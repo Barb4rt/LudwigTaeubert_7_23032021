@@ -1,0 +1,31 @@
+{
+  "name": "ludwigtaeubert_7_23032021",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "async": "^3.2.0",
+    "bcrypt": "^5.0.1",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mysql": "^2.18.1",
+    "mysql2": "^2.2.5",
+    "sequelize": "^6.6.1",
+    "validator": "^13.5.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "server": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Barb4rt/LudwigTaeubert_7_23032021.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Barb4rt/LudwigTaeubert_7_23032021/issues"
+  },
+  "homepage": "https://github.com/Barb4rt/LudwigTaeubert_7_23032021#readme"
+}
