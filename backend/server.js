@@ -1,6 +1,7 @@
 const express = require ('express');
 const bodyParser = require('body-parser');
 const apiRouter = require ('./apiRouter').router;
+const path = require('path');
 
 const server = express();
 
@@ -15,6 +16,7 @@ server.use ((req , res, next) =>{
 })
 
 server.use('/api/', apiRouter);
+server.use('/images', express.static(path.join(__dirname, 'images')));
 
 server.listen(8081, function(){
     console.log('serveur en écoute');
