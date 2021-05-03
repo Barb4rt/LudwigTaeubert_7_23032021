@@ -11,14 +11,19 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.hasMany(models.Message);
+      this.hasMany(models.Message, { onDelete: 'cascade' })
+      this.hasMany(models.Comment, { onDelete: 'cascade' })
+      this.hasMany(models.Like, { onDelete: 'cascade' })
+     
     }
   };
   User.init({
     email: DataTypes.STRING,
     username: DataTypes.STRING,
     password: DataTypes.STRING,
+    exp: DataTypes.INTEGER,
     bio: DataTypes.STRING,
+    profilePicture: DataTypes.STRING,
     isAdmin: DataTypes.BOOLEAN
   }, {
     sequelize,

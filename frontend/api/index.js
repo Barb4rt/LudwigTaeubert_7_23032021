@@ -3,10 +3,42 @@ import axios from 'axios'
 const endpoint = 'http://localhost:8081/api'
 
 export default {
-  getAllEvents() {
-    return axios.get(`${endpoint}/messages`)
+  //users routes
+  register(){
+    return axios.post(`${endpoint}/user/register/`)
   },
-  getUsersEvents() {
-    return axios.get(`${endpoint}/users/messages`)
+  login(){
+    return axios.post(`${endpoint}/user/login/`)
+  },
+  modifyUserProfil(){
+    return axios.put(`${endpoint}/user/me/`)
+  },
+  getUserProfil(){
+    return axios.get(`${endpoint}/user/me/`)
+  },
+  getAllUsers(){
+    return axios.get(`${endpoint}/users/all`)
+  },
+  destroyProfil(data){
+    return axios.delete(`${endpoint}/user/${data}`)
+  },
+  //Post routes
+  createPost(){
+    return axios.post(`${endpoint}/messages/new/`)
+  },
+  getAllPost() {
+    return axios.get(`${endpoint}/messages/`)
+  },
+  destroyPost(data){
+    return axios.delete(`${endpoint}/messages/${data}`)
+  },
+  likePost(data){
+    return axios.post(`${endpoint}/messages/like`, data)
+  },
+  commentPost(data){
+    return axios.post(`${endpoint}/message/comment`, data) 
+  },
+  destroyComment(data){
+    return axios.delete(`${endpoint}/message/comment/${data}`)
   }
 }

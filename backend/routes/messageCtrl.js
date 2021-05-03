@@ -1,12 +1,12 @@
 // Imports
-let models   = require('../models');
-let asyncLib = require('async');
-let jwtUtils = require('../utils/jwt');
-const fs = require('fs')
+const models   = require('../models');
+const asyncLib = require('async');
+const jwtUtils = require('../utils/jwt');
+const fs = require('fs');
+const { EDESTADDRREQ } = require('constants');
 
 
 // Constants
-const TITLE_LIMIT   = 2;
 const CONTENT_LIMIT = 4;
 const ITEMS_LIMIT   = 50;
 
@@ -14,25 +14,29 @@ const ITEMS_LIMIT   = 50;
 module.exports = {
   createMessage: function(req, res) {
     // Getting auth header
-    let headerAuth  = req.headers['authorization'];
-    let userId      = jwtUtils.getUserId(headerAuth);
+    console.log(req.file);
+    const headerAuth  = req.headers['authorization'];
+    const userId      = jwtUtils.getUserId(headerAuth);
+
     // Params
-    let title   = req.body.title;
-    let content = req.body.content;
-    let attachment =
+    const content = req.body.content;
+    const tag = req.body.tag
+    const attachment =
     () => {
       if(req.file){
-
         return `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
-      }return null 
+      }
+      if(req.body.gif){
+        return req.body.gif
+      }
+      return null 
     }
-    console.log(attachment());
 
-    if (title == null || content == null) {
+    if (tag == null || content == null) {
       return res.status(400).json({ 'error': 'missing parameters' });
     }
 
-    if (title.length <= TITLE_LIMIT || content.length <= CONTENT_LIMIT) {
+    if ( content.length <= CONTENT_LIMIT) {
       return res.status(400).json({ 'error': 'invalid parameters' });
     }
 
@@ -53,20 +57,32 @@ module.exports = {
       function(userFound, done) {
         if(userFound) {
           models.Message.create({
-            title  : title,
+            tag  : tag,
             content: content,
             likes  : 0,
             UserId : userFound.id,
-            username : userFound.username,
             attachment: attachment()
           })
           .then(function(newMessage) {
-            done( newMessage);
+            done(null, newMessage, userFound);
           }).catch((err)=>{
             return res.status(404).json({'error': err})
         });
         } else {
           res.status(404).json({ 'error': 'user not found' });
+        }
+      },
+      function( newMessage, userFound, done){
+        if(newMessage) {
+          userFound.update({
+            exp: userFound.exp + 5
+          }).then(function(newMessage) {
+            done(newMessage);
+          }).catch((err)=>{
+            return res.status(404).json({'error': err})
+        });
+        } else {
+          res.status(500).json({ 'error': 'Impossible de mettre à jour l\'utilisateur' });
         }
       }
     ], function(newMessage) {
@@ -80,25 +96,39 @@ module.exports = {
 
 
   listMessages: function(req, res) {
-    let fields  = req.query.fields;
-    let limit   = parseInt(req.query.limit);
-    let offset  = parseInt(req.query.offset);
-    let order   = req.query.order;
-    console.log('1')
+    const fields  = req.query.fields;
+    const limit   = parseInt(req.query.limit);
+    const offset  = parseInt(req.query.offset);
+    const order   = req.query.order;
 
     if (limit > ITEMS_LIMIT) {
       limit = ITEMS_LIMIT;
     }
 
     models.Message.findAll({
-      order: [(order != null) ? order.split(':') : ['updatedAt', 'DESC']],
+      order: [(order != null) ? order.split(':') : ['createdAt', 'DESC'],['Comments', 'createdAt', 'DESC']],
       attributes: (fields !== '*' && fields != null) ? fields.split(',') : null,
       limit: (!isNaN(limit)) ? limit : null,
       offset: (!isNaN(offset)) ? offset : null,
-      include: [{
+      include: [
+        {
+        model: models.Like,
+        attributes :['userId']
+      },
+        {
         model: models.User,
-        attributes: [ 'username' ]
-      }],
+        attributes :['id','bio','username' , 'profilePicture']
+      },
+      {
+        model: models.Comment,
+        
+        attributes: [ 'id','content','gifUrl' ],
+        include: [ {
+          model: models.User,
+          attributes :['username' , 'profilePicture']
+        }]
+      }
+    ],
     }).then(function(messages) {
       if (messages) {
         res.status(200).json(messages);
@@ -110,49 +140,11 @@ module.exports = {
       res.status(500).json({ "error": "invalid fields" });
     });
   },
-
-
-  listUsersMessages: function(req, res) {
-    let fields  = req.query.fields;
-    let limit   = parseInt(req.query.limit);
-    let offset  = parseInt(req.query.offset);
-    let order   = req.query.order;
-    let headerAuth  = req.headers['authorization'];
-    let userId      = jwtUtils.getUserId(headerAuth);
-    console.log('1')
-
-    if (limit > ITEMS_LIMIT) {
-      limit = ITEMS_LIMIT;
-    }
-
-    models.Message.findAll({
-      order: [(order != null) ? order.split(':') : ['updatedAt', 'DESC']],
-      attributes: (fields !== '*' && fields != null) ? fields.split(',') : null,
-      limit: (!isNaN(limit)) ? limit : null,
-      offset: (!isNaN(offset)) ? offset : null,
-      include: [{
-        model: models.User,
-        attributes: [ 'username' ]
-      }],
-      where: { userId : userId
-
-      }
-    }).then(function(messages) {
-      if (messages) {
-        res.status(200).json(messages);
-      } else {
-        res.status(404).json({ "error": "no messages found" });
-      }
-    }).catch(function(err) {
-      console.log(err);
-      res.status(500).json({ "error": "invalid fields" });
-    });
-  },
-  deleteMessage : (req, res) => {
+  destroyMessage : (req, res) => {
  // Getting auth header
- let headerAuth  = req.headers['authorization'];
- let userId      = jwtUtils.getUserId(headerAuth);
- 
+ const headerAuth  = req.headers['authorization'];
+ const userId      = jwtUtils.getUserId(headerAuth);
+
  asyncLib.waterfall([
    (done) => {
      models.User.findOne({
@@ -169,25 +161,43 @@ module.exports = {
       models.Message.findOne({
         where : { id : req.params.id}
       }).then((messageFound) => {
-        done( null , messageFound)
+        console.log(messageFound.UserId);
+        done( null ,userFound, messageFound)
        }).catch((err) => {
-         return res.status(500).json({ 'error': 'Impossible de trouver le message'})
+         return res.status(400).json({ 'error': 'Impossible de trouver le message'})
        });
     }
-   },
+   },(userFound,messageFound, done) => {
+     ;
+    if(userFound.id !== messageFound.UserId){
+      return res.status(500).json({ 'error': 'L\'utilisateur n\'a pas les droit nécessaire'})
+    }
+    done( null , messageFound)},
    (messageFound, done) => {
      if(messageFound){
-      const filename = messageFound.attachment.split('/images/')[1];
-      fs.unlink(`images/${filename}`, () => {
-        console.log(messageFound);
-       models.Message.destroy({
-         where : { id : messageFound.id }
-       }).then((messageDestroy) => {
-        done( messageDestroy)
-       }).catch((err) => {
-         return res.status(500).json({ 'error': 'Impossible de trouver le message'})
-       });
-     })
+      if(messageFound.attachment){
+        const filename = messageFound.attachment.split('/images/')[1];
+      console.log(filename);
+        fs.unlink(`images/${filename}`, () => {
+          console.log(messageFound);
+         models.Message.destroy({
+           where : { id : req.params.id }
+         }).then((messageDestroy) => {
+          done( messageDestroy)
+         }).catch((err) => {
+           return res.status(500).json({ 'error': 'Impossible de supprimer le message'})
+      })
+    })
+  }else{
+    models.Message.destroy({
+      where : { id : req.params.id }
+    }).then((messageDestroy) => {
+     done( messageDestroy)
+    }).catch((err) => {
+      return res.status(500).json({ 'error': 'Impossible de supprimer le message'})
+    });
+  }
+       
     } 
    }
  ],function(messageDestroy) {
@@ -197,5 +207,5 @@ module.exports = {
         return res.status(500).json({ 'error': 'cannot post message' });
       }
     })
-  }
+  } 
 }

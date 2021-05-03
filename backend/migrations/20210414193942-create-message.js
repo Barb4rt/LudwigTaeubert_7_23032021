@@ -14,13 +14,10 @@ module.exports = {
         references: {
           model: 'Users',
           key: 'id'
-        }
+        },
+        onDelete: "CASCADE"
       },
-      username: {
-        allowNull: false,
-        type: Sequelize.STRING
-      },
-      title: {
+      tag: {
         allowNull: false,
         type: Sequelize.STRING
       },
@@ -32,9 +29,13 @@ module.exports = {
         allowNull: true,
         type: Sequelize.STRING
       },
+      comment: {
+        allowNull: true,
+        type: Sequelize.INTEGER,
+      },
       likes: {
         allowNull: false,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       createdAt: {
         allowNull: false,

@@ -1,24 +1,9 @@
 <template>
   <v-container fluid >
-    <div class="d-flex flex-column" >
-      <v-toolbar-title class="text-center grey--text my-2">Choisir un filtre</v-toolbar-title>
-      <v-chip-group
-      class="mx-auto"
-        v-model="filter"
-        active-class="primary--text"
-        column
-        @change="filterPost"
-      >
-        <v-chip v-for="tag in tags" :key="tag" :value="tag">
-          {{ tag }}
-        </v-chip>
-      </v-chip-group>
-    </div>
-    <v-divider></v-divider>
-    <h1 class="text-center grey--text mb-2">File d'actualité</h1>
+    <h1 class="text-center grey--text mb-2">Votre fil d'actualité</h1>
     <template v-if="!isLoading">
       <AddEvent />
-      <EventCard  v-for="event in arrayPost" :key="event.id" :event="event" />
+      <EventCard v-for="event in arrayPost" :key="event.id" :event="event" />
     </template>
     <p v-else>Loading events</p>
   </v-container>
@@ -69,11 +54,11 @@ export default {
     });
   },
   computed: {
-    ...mapGetters(["eventList", "filteredPost", "userProfil", "users"]),
+    ...mapGetters(["eventList", "filteredPost", "userProfil"]),
     ...mapState(["status"]),
   },
   methods: {
-    ...mapActions(["GetAllPost", "FilterPost", "GetAllUsers"]),
+    ...mapActions(["GetAllPost", "FilterPost"]),
     pushToArray(payload) {
       this.arrayPost.push(payload);
     },
@@ -96,7 +81,6 @@ export default {
     async handleCreated() {
       try {
         await this.GetAllPost();
-        await this.GetAllUsers();    
       } catch (e) {
         console.log(e);
       }

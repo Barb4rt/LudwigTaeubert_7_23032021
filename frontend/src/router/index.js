@@ -4,7 +4,9 @@ import Home from "../views/Home.vue";
 import LoginUser from "../views/LoginUser.vue";
 import RegisterUser from "../views/RegisterUser.vue";
 import Thread from "../views/Thread";
+import PrivateThread from "../views/PrivateThread";
 import userDashboard from "../views/UserDashboard";
+import userProfil from "../views/UserProfil";
 Vue.use(VueRouter);
 
 const routes = [
@@ -24,15 +26,27 @@ const routes = [
     component: RegisterUser,
   },
   {
-    path: "/what's_new",
-    name: "what's_new",
+    path: "/thread",
+    name: "thread",
     component: Thread,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/thread/privatethread",
+    name: "privatethread",
+    component: PrivateThread,
     meta: { requiresAuth: true },
   },
   {
     path: "/dashboard/user",
     name: "userdashboard",
     component: userDashboard,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/userprofil",
+    name: "userprofil",
+    component: userProfil,
     meta: { requiresAuth: true },
   },
 ];

@@ -1,20 +1,35 @@
 <template>
-  <div>
-    <form @submit.prevent="login">
-      <label for="email"> Email: </label>
-      <input v-model="email" type="email" name="email" value />
+  <v-card width="400" class="mx-auto mt-5">
+    <v-card-title>
+      <h1 class="display-1">Login</h1>
+    </v-card-title>
+    <v-card-text>
+      <v-form @submit.prevent="login">
+        <v-text-field
+          v-model="email"
+          label="Email"
+          type="email"
+          prepend-icon="mdi-account-circle"
+        />
+        <v-text-field
+          v-model="password"
+          :type="showPassword ? 'text' : 'password'"
+          label="Password"
+          prepend-icon="mdi-lock"
+          :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+          @click:append="showPassword = !showPassword"
+        />
+        <v-card-actions>
+          <v-btn to="/register" color="success">Register</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn type="submit" color="info">Login</v-btn>
+        </v-card-actions>
+      </v-form>
+    </v-card-text>
+    <v-divider></v-divider>
 
-      <label for="password"> Password: </label>
-      <input v-model="password" type="password" name="password" value />
-
-      <button type="submit" name="button">Login</button>
-
-      <router-link to="/register">
-        Don't have an account? Register.
-      </router-link>
-    </form>
     <p>{{ error }}</p>
-  </div>
+  </v-card>
 </template>
 
 <script>
@@ -24,12 +39,13 @@ export default {
       email: "",
       password: "",
       error: null,
+      showPassword: false,
     };
   },
   methods: {
     login() {
       this.$store
-        .dispatch("login", {
+        .dispatch("Login", {
           email: this.email,
           password: this.password,
         })

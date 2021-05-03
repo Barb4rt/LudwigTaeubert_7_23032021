@@ -1,19 +1,28 @@
 const express = require('express');
 const usersCtrl = require('./routes/usersCtrl');
 const messageCtrl = require('./routes/messageCtrl');
-const multer = require('./middleware/multer-config')
+const commentCtrl = require('./routes/commentCtrl');
+const multerMsg = require('./middleware/multer-msg');
+const multerProfile = require('./middleware/multer-profilePicture');
+const likesCtrl    = require('./routes/likesCtrl');
 
 exports.router = (function(){
     const apiRouter = express.Router();
 
-    apiRouter.route('/users/register/').post(multer,usersCtrl.register);
-    apiRouter.route('/users/login/').post(usersCtrl.login);
-    apiRouter.route('/users/me/').get(usersCtrl.getUserProfile);
-    apiRouter.route('/users/me/').put(multer,usersCtrl.updateUserProfile);
+    apiRouter.route('/user/register/').post(multerProfile,usersCtrl.register);
+    apiRouter.route('/user/login/').post(usersCtrl.login);
+    apiRouter.route('/user/me/').get(usersCtrl.getUserProfile);
+    apiRouter.route('/users/all/').get(usersCtrl.getAllUsers);
+    apiRouter.route('/user/me/').put(multerProfile,usersCtrl.updateUserProfile);
+    apiRouter.route('/user/:id').delete(usersCtrl.destroyUser)
 
-    apiRouter.route('/messages/new/').post(multer,messageCtrl.createMessage);
-    apiRouter.route('/messages/:id').delete(messageCtrl.deleteMessage);
+    apiRouter.route('/messages/new/').post(multerMsg,messageCtrl.createMessage);
+    apiRouter.route('/messages/:id').delete(messageCtrl.destroyMessage);
     apiRouter.route('/messages/').get(messageCtrl.listMessages);
-    apiRouter.route('/users/messages/').get(messageCtrl.listUsersMessages);
+
+    apiRouter.route('/message/comment').post(commentCtrl.createComment);
+    apiRouter.route('/message/comment/:id').delete(commentCtrl.destroyComment);
+
+    apiRouter.route('/messages/like').post(likesCtrl.likePost);
     return apiRouter;
 })();
