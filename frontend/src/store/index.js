@@ -9,7 +9,7 @@ Vue.use(Vuex);
 const state = {
   user: null,
   events: [],
-  filteredPost:[],
+  filteredPost:null,
   userProfil: null,
   listOfUsers: null,
   status: 'pending',

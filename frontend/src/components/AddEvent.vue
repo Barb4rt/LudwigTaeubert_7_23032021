@@ -1,8 +1,7 @@
 <template>
   <v-container
-    fluid
     transition="scroll-y-transition"
-    class="mt-5 mb-5 pa-md-4 mx-lg-auto"
+    class=" mx-lg-auto"
     outlined
   >
     <div class="overline mb-4">Ajouter un message</div>
@@ -28,14 +27,18 @@
       </v-chip>
     </v-chip-group>
     <v-form
+      ref="messageForm"
       class="d-flex flex-column pa-2 space-between"
       @submit.prevent="addEvent()"
+      v-model="formValidity"
       enctype="multipart/form-data"
     >
       <div class="d-flex">
         <v-text-field
           label="Que voulez-vous partager ?"
           v-model="content"
+          :counter="150"
+          :rules="messageRules"
           type="text"
           name="content"
           value
@@ -60,7 +63,7 @@
         </div>
       </div>
       <div>
-        <v-btn type="submit" name="button">Envoyer</v-btn>
+        <v-btn type="submit" :disabled="!formValidity" name="button">Envoyer</v-btn>
       </div>
     </v-form>
     <v-sheet v-show="!gifHidden" class="mx-auto" elevation="0">
@@ -92,6 +95,7 @@
       </v-slide-group>
     </v-sheet>
     <p>{{ error }}</p>
+    <v-divider inset class="mx-auto my-15"></v-divider>
   </v-container>
 </template>
 
@@ -100,6 +104,7 @@ import axios from "axios";
 export default {
   data() {
     return {
+      formValidity: false,
       content: "",
       attachment: null,
       preview: null,
@@ -113,16 +118,21 @@ export default {
       searchIcon: "mdi-magnify",
       gifHidden: true,
       tags: [
-        "Work",
-        "Home Improvement",
-        "Vacation",
-        "Food",
-        "Drawers",
-        "Shopping",
-        "Art",
-        "Tech",
+        "Monde professionnel",
+        "Développement personnel",
+        "Détente",
+        "Artistique",
+        "Technologie",
+        "Bon plans",
+        "Histoire",
+        "Découvertes",
+        "Animaux",
       ],
       value: [],
+       messageRules: [
+        (value) => !!value || "Un message est requis",
+        (value) => value.length <= 150 || "150 Caractères maximum"
+      ]
     };
   },
   methods: {

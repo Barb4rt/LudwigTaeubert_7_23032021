@@ -13,7 +13,9 @@
             v-model="username"
             type="text"
             name="username"
+            :rules="userRules"
             value
+            required
           />
           <v-text-field
             label="Email"
@@ -27,8 +29,17 @@
             v-model="password"
             type="password"
             name="v-btnrd"
+            :rules="passwordRules"
             value
+            required
           />
+          <h2 class="title mb-2">Vos sujets préférer ?</h2>
+    <p class="subheader mb-2">(Obligatoire)</p>
+    <v-chip-group v-model="value" multiple active-class="primary--text" :rules="tagsRules" column required>
+      <v-chip v-for="tag in tags" :key="tag" :value="tag">
+        {{ tag }}
+      </v-chip>
+    </v-chip-group>
           <v-file-input
             label="Attach profile picture"
             id="file"
@@ -69,28 +80,52 @@ export default {
       password: "",
       profilePicture: null,
       error: null,
+      userRules: [
+        (value) => !!value || "Un nom d'utilisateur est requis",
+        (value) => value.length >= 5 && value.length <= 12 || "Le nom d'utilisateur doit avoir entre 5 et 12 caractère"
+      ],
+      passwordRules: [
+        (value) => !!value || "Un mot de passe est requis",
+        (value) => value.length >= 4 && value.length <= 8 || "Le mot de passe doit avoir entre 4 et 8 caractère",
+        (value) => /^(?=.*\d).{4,8}$/.test(value) || "Le mot de passe doit contenir au moins un chiffre"
+      ],
       emailRules: [
-        (value) => !!value || "Email is required.",
-        (value) => value.indexOf("@") !== 0 || "Email should have a username.",
-        (value) => value.includes("@") || "Email should include an @ symbol.",
+        (value) => !!value || "Une adresse Email est requise",
+        (value) => value.indexOf("@") !== 0 || "Une adresse Email valide est requise",
+        (value) => value.includes("@") || "Une adresse Email valide est requise",
         (value) =>
-          value.includes(".") || "Email should include a period symbol.",
+          value.includes(".") || "Une adresse Email valide est requise",
         (value) =>
           value.indexOf(".") <= value.length - 3 ||
-          "Email should contain a valid domain extension.",
+          "Une adresse Email valide est requise",
+      ],
+      tagsRules: [
+        (value) => !!value || "Au moins une préférence doit-être séléctionner",
+        (value) => value.length >= 1 && value.length <= 3  || "Maximum 3 préférence sont autorisée",
       ],
       formValidity: false,
+      tags: [
+        "Monde professionnel",
+        "Développement personnel",
+        "Détente",
+        "Artistique",
+        "Technologie",
+        "Bon plans",
+        "Histoire",
+        "Découvertes",
+        "Animaux",
+      ],
+      value: null,
     };
   },
   methods: {
     register() {
       let data = new FormData();
-
       data.append("username", this.username);
       data.append("email", this.email);
       data.append("password", this.password);
       data.append("image", this.profilePicture);
-
+      data.append("tags", this.value)
       this.$store
         .dispatch("Register", data)
         .then(() => {
@@ -112,7 +147,6 @@ export default {
     selectFile(file) {
       console.log(file);
       this.profilePicture = file;
-      console.log(this.profilePicture);
     },
   },
 };

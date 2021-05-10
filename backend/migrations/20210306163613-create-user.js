@@ -27,6 +27,10 @@ module.exports = {
       exp: {
         allowNull: false,
         type: Sequelize.INTEGER
+      },
+      tags: {
+        allowNull: false,
+        type: Sequelize.STRING
       }
       ,
       profilePicture: {

@@ -5,7 +5,7 @@ let jwtUtils = require('../utils/jwt');
 
 
 // Constants
-const CONTENT_LIMIT = 4;
+const CONTENT_LIMIT = 150;
 const ITEMS_LIMIT   = 50;
 
 // Routes
@@ -24,6 +24,10 @@ module.exports = {
 
     if (content == null && gifUrl == null  ) {
       return res.status(400).json({ 'error': 'requête non valide' });
+    }
+
+    if ( content.length > CONTENT_LIMIT) {
+      return res.status(400).json({ 'error': 'invalid parameters' });
     }
 
     asyncLib.waterfall([

@@ -1,23 +1,8 @@
 <template>
-  <v-container fluid >
-    <div class="d-flex flex-column" >
-      <v-toolbar-title class="text-center grey--text my-2">Choisir un filtre</v-toolbar-title>
-      <v-chip-group
-      class="mx-auto"
-        v-model="filter"
-        active-class="primary--text"
-        column
-        @change="filterPost"
-      >
-        <v-chip v-for="tag in tags" :key="tag" :value="tag">
-          {{ tag }}
-        </v-chip>
-      </v-chip-group>
-    </div>
-    <v-divider></v-divider>
+  <v-container>
     <h1 class="text-center grey--text mb-2">File d'actualité</h1>
     <template v-if="!isLoading">
-      <AddEvent />
+      <AddEvent/>
       <EventCard  v-for="event in arrayPost" :key="event.id" :event="event" />
     </template>
     <p v-else>Loading events</p>
@@ -27,10 +12,11 @@
 <script>
 import EventCard from "../components/EventCard";
 import AddEvent from "../components/AddEvent";
+
 import { mapGetters, mapActions, mapState } from "vuex";
 
 export default {
-  components: { EventCard, AddEvent },
+  components: { EventCard, AddEvent},
   data() {
     return {
       isLoading: true,
@@ -38,17 +24,6 @@ export default {
       arrayComment: this.$store.state.events.Comments,
       show: true,
       overlay: false,
-      filter: null,
-      tags: [
-        "Work",
-        "Home Improvement",
-        "Vacation",
-        "Food",
-        "Drawers",
-        "Shopping",
-        "Art",
-        "Tech",
-      ],
     };
   },
   watch: {
@@ -61,6 +36,19 @@ export default {
         });
       }
     },
+    filteredPost(newVal, oldVal) {
+      console.log(`Updating from ${oldVal} to ${newVal}`);
+      if (newVal ) {
+        this.handleCreated().then(() => {
+          this.isLoading = false;
+          this.arrayPost = this.filteredPost;
+        });
+      }
+      if(!newVal){
+        this.isLoading = false;
+          this.arrayPost = this.eventList;
+      }
+    }
   },
   created: function () {
     this.handleCreated().then(() => {
@@ -70,28 +58,12 @@ export default {
   },
   computed: {
     ...mapGetters(["eventList", "filteredPost", "userProfil", "users"]),
-    ...mapState(["status"]),
+    ...mapState(["status", "filteredPost"]),
   },
   methods: {
     ...mapActions(["GetAllPost", "FilterPost", "GetAllUsers"]),
     pushToArray(payload) {
       this.arrayPost.push(payload);
-    },
-    filterPost() {
-      this.isLoading = true;
-      let filter = this.filter;
-      console.log(filter);
-      if (filter) {
-        this.$store.dispatch("FilterPost", filter).then(() => {
-          this.isLoading = false;
-          this.arrayPost = this.filteredPost;
-        });
-      } else {
-        this.handleCreated().then(() => {
-          this.isLoading = false;
-          this.arrayPost = this.eventList;
-        });
-      }
     },
     async handleCreated() {
       try {

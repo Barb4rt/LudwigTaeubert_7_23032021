@@ -22,18 +22,6 @@ export default {
       arrayPost: [],
       arrayComment: this.$store.state.events.Comments,
       show: true,
-      overlay: false,
-      filter: null,
-      tags: [
-        "Work",
-        "Home Improvement",
-        "Vacation",
-        "Food",
-        "Drawers",
-        "Shopping",
-        "Art",
-        "Tech",
-      ],
     };
   },
   watch: {
@@ -42,7 +30,7 @@ export default {
       if (newVal === "success") {
         this.handleCreated().then(() => {
           this.isLoading = false;
-          this.arrayPost = this.eventList;
+          this.arrayPost = this.filteredPost;
         });
       }
     },
@@ -50,37 +38,23 @@ export default {
   created: function () {
     this.handleCreated().then(() => {
       this.isLoading = false;
-      this.arrayPost = this.eventList;
+      this.arrayPost = this.filteredPost;
     });
   },
   computed: {
-    ...mapGetters(["eventList", "filteredPost", "userProfil"]),
+    ...mapGetters(["filteredPost", "userConnect"]),
     ...mapState(["status"]),
   },
   methods: {
-    ...mapActions(["GetAllPost", "FilterPost"]),
-    pushToArray(payload) {
-      this.arrayPost.push(payload);
-    },
-    filterPost() {
-      this.isLoading = true;
-      let filter = this.filter;
-      console.log(filter);
-      if (filter) {
-        this.$store.dispatch("FilterPost", filter).then(() => {
-          this.isLoading = false;
-          this.arrayPost = this.filteredPost;
-        });
-      } else {
-        this.handleCreated().then(() => {
-          this.isLoading = false;
-          this.arrayPost = this.eventList;
-        });
-      }
+      ...mapActions(["FilterPost", "GetAllPost","GetAllUsers"]),
+      filterPost(filter) {
+        this.$store.dispatch("FilterPost", filter)
     },
     async handleCreated() {
       try {
         await this.GetAllPost();
+        await this.GetAllUsers();
+        await this.filterPost(this.userConnect.tags.split(','));
       } catch (e) {
         console.log(e);
       }

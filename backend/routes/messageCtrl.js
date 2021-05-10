@@ -3,12 +3,11 @@ const models   = require('../models');
 const asyncLib = require('async');
 const jwtUtils = require('../utils/jwt');
 const fs = require('fs');
-const { EDESTADDRREQ } = require('constants');
 
 
 // Constants
-const CONTENT_LIMIT = 4;
-const ITEMS_LIMIT   = 50;
+const ITEMS_LIMIT = 50;
+const CONTENT_LIMIT   = 150;
 
 // Routes
 module.exports = {
@@ -36,7 +35,7 @@ module.exports = {
       return res.status(400).json({ 'error': 'missing parameters' });
     }
 
-    if ( content.length <= CONTENT_LIMIT) {
+    if ( content.length > CONTENT_LIMIT) {
       return res.status(400).json({ 'error': 'invalid parameters' });
     }
 

@@ -32,7 +32,8 @@ export const  GetAllUsers = async ({ commit }) => {
 export const  GetUserProfil = async ({ commit }) => {
   try {
     await api.getUserProfil().then(({ data }) => {
-      commit("GET_USER_PROFIL", data);
+      console.log('test');
+      commit("SET_USER_DATA", data);
       commit("UPDATE_STATUS", 'success');
   })
 }catch (error) {
@@ -67,14 +68,12 @@ try {
     commit("GET_ALL_EVENT", data)
     commit("UPDATE_STATUS", 'success');
 })
-}catch (error) {
-commit("LOGOUT")
+}catch (err) {
+  console.log(err);
 } }
 
 export const FilterPost = ({ commit }, filter) => {
-  commit("UPDATE_STATUS", 'pending');   
   commit("FILTER_POST", filter)
-  commit("UPDATE_STATUS", 'success')
   }
 
   export const PutUser = ({ commit }, credentials) => {

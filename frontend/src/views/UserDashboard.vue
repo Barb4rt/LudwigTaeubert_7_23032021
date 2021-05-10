@@ -1,18 +1,19 @@
-<template>
-  <v-container v-if="userProfil" fluid>
-    <h1 class="text-center">Bienvenue {{ userProfil.username }}</h1>
-    <v-divider class="my-5"></v-divider>
-    <v-row>
-      <v-col cols="4" height="20px">
+<template >
+<div v-if="userConnect">
+    <h1 class="text-center my-2">
+      Bienvenue {{ userConnect.username }}
+      </h1>
+    <v-divider class="my-5 mx-12"></v-divider>
+    <div class="d-md-flex">
+      <v-col cols="d-md-4">
         <v-hover v-slot="{ hover }">
-          <v-card id="rounded-card" :elevation="hover ? 10 : 2" class="d-flex">
-            <v-img
-              v-if="!url"
-              aspect-ratio="1"
-              :src="userProfil.profilePicture"
-            >
-            </v-img>
-            <v-img v-else aspect-ratio="1" :src="url"> </v-img>
+          <v-card  id="rounded-card" :elevation="hover ? 10 : 2">
+        <v-img 
+        v-if="!url"
+        aspect-ratio="1"
+         :src="userConnect.profilePicture">
+        </v-img>
+         <v-img v-else aspect-ratio="1" :src="url"> </v-img>
             <v-fade-transition>
               <v-overlay v-if="hover" absolute>
                 <v-file-input
@@ -29,36 +30,46 @@
                 </v-btn>
               </v-overlay>
             </v-fade-transition>
-          </v-card>
+            </v-card>
         </v-hover>
       </v-col>
-      <v-col cols="8">
-        <div>Votre niveau de réputation est : </div>
-        <ExpBar id="expBar" :exp="userProfil.exp"/>
-        <v-form @submit.prevent="putUser">
-          <h2> biographie </h2>
-          <v-text-field
-            :placeholder="userProfil.bio"
-            v-model="bio"
-            type="text"
-            name="content"
-            value
-          />
+      <v-divider class="my-2 d-md-none" ></v-divider>
+      <v-col cols="d-sm-10 text-center">
+        <div class="d-flex flex-column align-center">
+        <div class="font-weight-medium" >Votre niveau de réputation est : </div>
+        <ExpBar id="expBar" :exp="userConnect.exp"/>
+        </div>
+        <v-divider class="my-2 d-md-none" ></v-divider>
+        <v-spacer class="my-6 d-sm-none" ></v-spacer>
+        <v-form  class="text-center" @submit.prevent="putUser">
+          <h2 class=" text-center font-weight-medium"> biographie </h2>
+          <v-spacer class="my-4 d-md-none" ></v-spacer>
+          <v-textarea
+          class="font-weight-light"
+          type="text"
+          name="content"
+          :value="userConnect.bio"
+          @change="modifyBio"
+          auto-grow
+          filled
+        ></v-textarea>
           <v-btn type="submit"> submit</v-btn>
-          <v-btn
+        </v-form>
+        <v-spacer class="my-6" ></v-spacer>
+        <v-divider class="my-2 d-md-none" ></v-divider>
+        <v-btn
             color="red"
             class="ma-2 white--text"
-            @click="destroyProfil(userProfil.id)"
+            @click="destroyProfil(userConnect.id)"
             ><v-icon left dark> mdi-delete </v-icon>
             supprimer le profil
           </v-btn>
-        </v-form>
       </v-col>
-    </v-row>
     <v-overlay :value="overlay"
       ><v-alert type="success"> Profil mis à jour </v-alert></v-overlay
     >
-  </v-container>
+    </div>
+</div>
 </template>
 
 <script>
@@ -69,9 +80,7 @@ export default {
   data() {
     return {
       hidden: true,
-      disableForm: true,
-      username: "",
-      bio: "",
+      bio:"",
       profilePicture: null,
       url: null,
       overlay: false,
@@ -87,7 +96,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["userProfil"]),
+    ...mapGetters(["userConnect"]),
   },
   methods: {
     putUser() {
@@ -98,7 +107,6 @@ export default {
         .dispatch("PutUser", data)
         .then(() => {
           this.overlay = !this.overlay;
-          console.log("mis a jour");
         })
         .catch((err) => {
           this.error = err.response.data.error;
@@ -124,6 +132,10 @@ export default {
           this.error = err;
         });
     },
+    modifyBio(value) {
+      console.log(value);
+      this.bio = value
+    }
   },
 };
 </script>
@@ -132,8 +144,5 @@ export default {
 #rounded-card {
   border-radius: 50%;
   overflow: hidden;
-}
-#expBar{
-    
 }
 </style>

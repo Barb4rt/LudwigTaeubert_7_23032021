@@ -8,36 +8,24 @@
       min-height="200"
       transition="fade-transition"
     >
-      <v-container
-        height="10"
-        transition="scroll-y-transition"
-        class="mt-5 mb-5 pa-md-4 mx-lg-auto"
-        outlined
-      >
-        <div class="d-flex pa-2 mb-6 justify-space-between">
-          <div class="d-flex">
+      <div>
+        <div class=" ma-2">
+          <div class="d-flex align-center justify-space-between">
+            <div class="d-inline-flex align-center ">
             <v-btn icon @click="seeProfil(event.UserId)">
-              <v-avatar>
-                <v-img :src="profil.profilePicture"> </v-img>
+              <v-avatar :style="levelColor">
+                <v-img :src="profil.profilePicture"></v-img>
               </v-avatar>
             </v-btn>
-            <v-btn text class="ml-3" to="userProfil">{{
+            <v-btn text @click="seeProfil(event.UserId)">{{
               profil.username
             }}</v-btn>
-            <v-chip color="blue" dark class="pa-1"
-              ><ExpBar id="level" :fullDisplay="false" :exp="profil.exp"
+            <v-chip color="blue" dark class="d-none d-md-flex"
+              ><ExpBar id="level" @level-color="PPBordercolor"  :fullDisplay="false" :exp="profil.exp"
             /></v-chip>
-          </div>
-          <div class="d-inline-flex align-center pa-2">
-            <v-chip
-              v-for="tag in tagArray"
-              :key="tag"
-              :value="tag"
-              class="ma-2"
-              color="red"
-              outlined
-              >{{ tag }}
-            </v-chip>
+            </div>
+            <div class="d-inline-flex align-center ">
+            
             <div>
               <v-menu transition="slide-x-transition" bottom right>
                 <template v-slot:activator="{ on, attrs }">
@@ -59,6 +47,8 @@
               </v-menu>
             </div>
           </div>
+          </div>
+          
         </div>
         <v-img
           max-width="50%"
@@ -67,12 +57,21 @@
           :src="event.attachment"
         ></v-img>
         <v-card-text
-          class="headline font-weight-bold d-flex flex-column mb-6"
+          class="font-weight-light d-flex flex-column mb-6"
           >{{ event.content }}</v-card-text
         >
 
-        <div class="d-flex pa-2 mb-6 justify-end">
-          <div>
+        <div class="d-flex pa-2 mb-6 justify-space-between">
+          <v-chip
+              v-for="tag in tagArray"
+              :key="tag"
+              :value="tag"
+              class="ma-2"
+              color="red"
+              outlined
+              >{{ tag }}
+            </v-chip>
+          <div class="d-inline-flex align-center">
             <v-icon
               class="mr-1"
               :style="{ color: isLiked }"
@@ -81,7 +80,7 @@
               mdi-heart
             </v-icon>
             <span class="subheading mr-2">{{ event.likes }}</span>
-            <span class="mr-1">·</span>
+            <v-spacer class="mx-auto"></v-spacer>
             <v-icon class="mr-1" @click="expand = !expand"> mdi-comment </v-icon
             ><span>{{ this.event.Comments.length }}</span>
           </div>
@@ -112,10 +111,39 @@
                 </v-img>
               </div>
             </v-hover>
+            <div class="text-center">
+      <v-btn
+                  class="d-md-none d-sm-flex"
+                  color="blue"
+                  dark
+                  @click="sheet = !sheet"
+                    fab
+                    fixed
+                    bottom
+                    right
+                  >
+                    <v-icon>mdi-pencil</v-icon>
+                  </v-btn>
+                  <div>Ajouter un commentaire</div>
+                  
+      <v-bottom-sheet v-model="sheet">
+        <v-sheet
+          class="text-center"
+        >
+          <v-btn
+            class="mt-6"
+            text
+            color="red"
+            @click="sheet = !sheet"
+          >
+            close
+          </v-btn>
+          <div class="py-3">
             <v-form
-              class="d-flex flex-row align-center"
+              class=" align-center"
               @submit.prevent="commentMessage()"
               enctype="multipart/form-data"
+              v-model="formValidity"
             >
               <v-text-field
                 class="pa-2 mx-5 my-2"
@@ -123,10 +151,45 @@
                 v-model="content"
                 type="text"
                 name="content"
+                :counter="150"
                 value
                 prepend-icon="mdi-pencil"
+                :rules="commentRules"
               />
-                <v-btn class="mb-3" type="submit" name="button">Envoyer</v-btn>
+                <v-btn class="mb-3" type="submit" :disabled="!formValidity" name="button">Envoyer</v-btn>
+                <v-btn
+                class="d-flex align-center"
+                icon
+                type="button"
+                name="button"
+                @click="getGif(), (gifHidden = !gifHidden)"
+              >
+                <v-icon>mdi-gif</v-icon></v-btn
+              >
+            </v-form>
+          </div>
+          
+        </v-sheet>
+      </v-bottom-sheet>
+            </div>
+            <v-form
+              class="d-md-flex align-center d-none"
+              @submit.prevent="commentMessage()"
+              enctype="multipart/form-data"
+              v-model="formValidity"
+            >
+              <v-text-field
+                class="pa-2 mx-5 my-2"
+                label="Que voulez-vous ajouter ?"
+                v-model="content"
+                type="text"
+                name="content"
+                :counter="150"
+                value
+                prepend-icon="mdi-pencil"
+                :rules="commentRules"
+              />
+                <v-btn class="mb-3" type="submit" :disabled="!formValidity" name="button">Envoyer</v-btn>
                 <v-btn
                 class="d-flex align-center"
                 icon
@@ -198,10 +261,10 @@
             </v-virtual-scroll>
           </div>
         </v-expand-transition>
-      </v-container>
+      </div>
     </v-lazy>
 
-    <v-divider inset class="mx-lg-auto"></v-divider>
+    <v-divider inset class="mx-auto mb-15"></v-divider>
   </div>
 </template>
 
@@ -222,6 +285,8 @@ export default {
   },
   data() {
     return {
+      sheet: false,
+      formValidity: false,
       expand: false,
       isHidden: true,
       content: "",
@@ -233,6 +298,10 @@ export default {
       preview: null,
       searchIcon: "mdi-magnify",
       searchGif: "",
+      commentRules: [
+        (value) => value.length < 150 || "Le nom d'utilisateur doit avoir entre 5 et 12 caractère"
+      ],
+      levelColor: '' 
     };
   },
   computed: {
@@ -249,7 +318,7 @@ export default {
       return this.event.tag.split(",");
     },
     isOwner: function () {
-      if (this.userConnect === this.event.UserId) {
+      if (this.userConnect.id === this.event.UserId) {
         return true;
       } else {
         return false;
@@ -333,11 +402,12 @@ export default {
     selectedGif(gif) {
       this.preview = gif;
       this.gifUrl = gif;
-      console.log(gif);
+      this.formValidity = true
     },
     cleanAttachment() {
       this.preview = null;
       this.gifUrl = null;
+      this.formValidity = false
     },
     likeMessage() {
       let data = {
@@ -368,6 +438,9 @@ export default {
         this.$router.push({ name: "userprofil" });
       });
     },
+    PPBordercolor(payload){
+       this.levelColor = `border: 3px solid ${payload.color}` 
+    }
   },
 };
 </script>

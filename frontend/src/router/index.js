@@ -32,7 +32,7 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: "/thread/privatethread",
+    path: "/privatethread",
     name: "privatethread",
     component: PrivateThread,
     meta: { requiresAuth: true },

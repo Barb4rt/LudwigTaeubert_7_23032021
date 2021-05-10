@@ -4,7 +4,7 @@ export const loggedIn = (state) => {
 
 export const userProfil = (state) => state.userProfil;
 
-export const userConnect = (state) => state.userProfil.id;
+export const userConnect = (state) => state.user;
 
 export const users = (state) => state.listOfUsers;
 
