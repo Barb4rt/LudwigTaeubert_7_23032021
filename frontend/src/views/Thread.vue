@@ -71,8 +71,7 @@ export default {
     };
   },
   watch: {
-    status(newVal, oldVal) {
-      console.log(`Updating from ${oldVal} to ${newVal}`);
+    status(newVal) {
       if (newVal === "success") {
         this.handleCreated().then(() => {
           this.isLoading = false;
@@ -80,8 +79,7 @@ export default {
         });
       }
     },
-    filteredPost(newVal, oldVal) {
-      console.log(`Updating from ${oldVal} to ${newVal}`);
+    filteredPost(newVal) {
       if (newVal) {
         this.handleCreated().then(() => {
           this.isLoading = false;

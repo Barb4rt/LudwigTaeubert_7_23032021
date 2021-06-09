@@ -1,29 +1,27 @@
 <template>
-    <v-sheet >
-      <div class="text-center grey--text my-2 ">Choisir un filtre</div>
-      <v-chip-group
-        v-model="filter"
-        active-class="primary--text"
-        column
-        @change="filterPost"
-      >
-        <v-chip v-for="tag in tags" :key="tag" :value="tag">
-          {{ tag }}
-        </v-chip>
-      </v-chip-group>
-    </v-sheet>
+  <v-sheet>
+    <div class="text-center grey--text my-2">Choisir un filtre</div>
+    <v-chip-group
+      v-model="filter"
+      active-class="primary--text"
+      column
+      @change="filterPost"
+    >
+      <v-chip v-for="tag in tags" :key="tag" :value="tag">
+        {{ tag }}
+      </v-chip>
+    </v-chip-group>
+  </v-sheet>
 </template>
 
 <script>
-import { mapActions} from "vuex";
+import { mapActions } from "vuex";
 export default {
   name: "Filters",
-  props: {
-    
-    },
-  data() {     
+  props: {},
+  data() {
     return {
-        filter: null,
+      filter: null,
       tags: [
         "Monde professionnel",
         "Développement personnel",
@@ -37,14 +35,11 @@ export default {
       ],
     };
   },
-  methods : {
-      ...mapActions(["FilterPost"]),
-      filterPost(filter) {
-        this.$store.dispatch("FilterPost", filter)
-        console.log(filter);
+  methods: {
+    ...mapActions(["FilterPost"]),
+    filterPost(filter) {
+      this.$store.dispatch("FilterPost", filter);
     },
-  }
+  },
 };
 </script>
-
-

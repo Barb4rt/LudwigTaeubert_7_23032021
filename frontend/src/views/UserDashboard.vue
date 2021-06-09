@@ -51,37 +51,51 @@
             filled
           ></v-textarea>
           <v-row class="d-flex">
-<v-col class="text-center"  v-if="modifyTags === false" cols="12" >
-  <div class="d-flex justify-space-around">
-    <h2 class="text-center font-weight-medium mb-5">Vos préférences </h2>
-  <v-btn color="info" @click=" userModifyTags">
-      Modifier mes préférences
-      </v-btn>
-    </div>
-<v-chip-group >
-      <v-chip v-for="tag in userTags" :key="tag" color="success" class="mx-auto">
-        {{ tag }}
-      </v-chip>
-    </v-chip-group>
-          </v-col>
-          <v-col v-else cols="12">
-            <div class="d-flex justify-space-around">
-            <h2 class="text-center font-weight-medium mb-5">Vos nouvelles préférences </h2>
-            <v-btn @click="cancelModifyTag" class="red white--text mt-2">Annuler</v-btn>
-            </div>
-<v-chip-group >
-      <v-chip v-for="tag in tagValue" :key="tag" color="success" class="mx-auto">
-        {{ tag }}
-      </v-chip>
-    </v-chip-group>
-    
-          </v-col>
-          </v-row>  
-    <v-row>
-      <v-col>
-      </v-col> 
-    </v-row>
-    <v-divider inset class="my-5 mx-12"></v-divider>
+            <v-col class="text-center" v-if="modifyTags === false" cols="12">
+              <div class="d-flex justify-space-around">
+                <h2 class="text-center font-weight-medium mb-5">
+                  Vos préférences
+                </h2>
+                <v-btn color="info" @click="userModifyTags">
+                  Modifier mes préférences
+                </v-btn>
+              </div>
+              <v-chip-group>
+                <v-chip
+                  v-for="tag in userTags"
+                  :key="tag"
+                  color="success"
+                  class="mx-auto"
+                >
+                  {{ tag }}
+                </v-chip>
+              </v-chip-group>
+            </v-col>
+            <v-col v-else cols="12">
+              <div class="d-flex justify-space-around">
+                <h2 class="text-center font-weight-medium mb-5">
+                  Vos nouvelles préférences
+                </h2>
+                <v-btn @click="cancelModifyTag" class="red white--text mt-2"
+                  >Annuler</v-btn
+                >
+              </div>
+              <v-chip-group>
+                <v-chip
+                  v-for="tag in tagValue"
+                  :key="tag"
+                  color="success"
+                  class="mx-auto"
+                >
+                  {{ tag }}
+                </v-chip>
+              </v-chip-group>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col> </v-col>
+          </v-row>
+          <v-divider inset class="my-5 mx-12"></v-divider>
           <v-btn type="submit">Mettre à jour mon profil</v-btn>
         </v-form>
         <v-spacer class="my-5"></v-spacer>
@@ -99,16 +113,8 @@
       </v-col>
     </div>
     <v-bottom-sheet v-model="sheet">
-      <v-sheet
-        class="text-center"
-        height="200px"
-      >
-        <v-btn
-          class="mt-6"
-          text
-          color="red"
-          @click="sheet = !sheet"
-        >
+      <v-sheet class="text-center" height="200px">
+        <v-btn class="mt-6" text color="red" @click="sheet = !sheet">
           close
         </v-btn>
         <v-chip-group
@@ -117,18 +123,12 @@
           multiple
           max="3"
         >
-          <v-chip
-            v-for="tag in tags"
-            :key="tag"
-            :value="tag"
-            class="mx-auto"
-          >
+          <v-chip v-for="tag in tags" :key="tag" :value="tag" class="mx-auto">
             {{ tag }}
           </v-chip>
         </v-chip-group>
       </v-sheet>
     </v-bottom-sheet>
-    
   </v-container>
 </template>
 
@@ -171,17 +171,16 @@ export default {
   },
   computed: {
     ...mapGetters(["userConnect"]),
-    userTags: function (){
-     return this.userConnect.tags.split(',')
-    }
+    userTags: function () {
+      return this.userConnect.tags.split(",");
+    },
   },
   methods: {
     putUser() {
-      let tags = this.userTags.toString()
-      if (this.tagValue){
-        tags = this.tagValue.toString() 
+      let tags = this.userTags.toString();
+      if (this.tagValue) {
+        tags = this.tagValue.toString();
       }
-      console.log(tags);
       let data = new FormData();
       data.append("bio", this.bio);
       data.append("image", this.profilePicture);
@@ -190,8 +189,8 @@ export default {
         .dispatch("PutUser", data)
         .then(() => {
           this.overlay = !this.overlay;
-          this.tagValue = null
-          this.modifyTags =false
+          this.tagValue = null;
+          this.modifyTags = false;
         })
         .catch((err) => {
           this.error = err.response.data.error;
@@ -209,9 +208,7 @@ export default {
     destroyProfil(userId) {
       this.$store
         .dispatch("DestroyProfil", userId)
-        .then(() => {
-    
-        })
+        .then(() => {})
         .catch((err) => {
           this.error = err;
         });
@@ -220,18 +217,15 @@ export default {
       this.bio = value;
     },
     userModifyTags() {
-      this.tagValue = []
-      this.sheet = !this.sheet
-      this.modifyTags = true
+      this.tagValue = [];
+      this.sheet = !this.sheet;
+      this.modifyTags = true;
     },
-    cancelModifyTag(){
-      this.modifyTags = false
-      this.tagValue = null
-    }
+    cancelModifyTag() {
+      this.modifyTags = false;
+      this.tagValue = null;
+    },
   },
-  created(){
-    console.log(this.userConnect);
-  }
 };
 </script>
 

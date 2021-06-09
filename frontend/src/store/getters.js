@@ -15,4 +15,3 @@ export const eventList = (state) => state.events;
 export const filteredPost = (state) => state.filteredPost;
 
 export const status = (state) => state.status;
-

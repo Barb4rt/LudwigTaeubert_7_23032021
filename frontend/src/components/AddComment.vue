@@ -95,7 +95,7 @@ export default {
       expandGif: false,
       gifUrl: null,
       preview: null,
-      error : null,
+      error: null,
       commentRules: [
         (v) =>
           (v && this.gifUrl === null && v.length <= 150) ||
@@ -165,7 +165,6 @@ export default {
         });
     },
     selectedGif(gif) {
-      console.log(gif);
       this.preview = gif.url;
       this.gifUrl = gif.url;
       this.formValidity = true;
@@ -177,7 +176,6 @@ export default {
       this.formValidity = false;
     },
     destroyComment(payload) {
-      console.log(payload.id);
       this.$store
         .dispatch("DestroyComment", payload.id)
         .then(() => {

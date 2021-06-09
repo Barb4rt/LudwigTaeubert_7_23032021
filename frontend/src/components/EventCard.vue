@@ -88,7 +88,11 @@
         </div>
 
         <v-expand-transition>
-          <v-container elevation-20 class="rounded-xl" v-show="expandComment === true">
+          <v-container
+            elevation-20
+            class="rounded-xl"
+            v-show="expandComment === true"
+          >
             <v-divider class="my-2 d-md-none d-sm-flex"></v-divider>
             <v-hover v-slot="{ hover }">
               <div>
@@ -119,23 +123,26 @@
                 ><span class="ml-2">Ajouter un commentaire</span>
               </v-btn>
 
-              
               <v-divider class="my-2 d-md-none d-sm-flex"></v-divider>
 
               <v-bottom-sheet v-model="comment">
                 <v-sheet class="text-center">
                   <v-btn
-            fab
-            dark
-            fixed
-            bottom
-            left
-            class="red"
-            @click="comment =!comment"
-            name="button"
-            ><v-icon>mdi-minus</v-icon></v-btn
-          >
-                  <AddComment :eventId="event.id" :key="componentKey" @post-comment="forceRerender"/>
+                    fab
+                    dark
+                    fixed
+                    bottom
+                    left
+                    class="red"
+                    @click="comment = !comment"
+                    name="button"
+                    ><v-icon>mdi-minus</v-icon></v-btn
+                  >
+                  <AddComment
+                    :eventId="event.id"
+                    :key="componentKey"
+                    @post-comment="forceRerender"
+                  />
                 </v-sheet>
               </v-bottom-sheet>
             </div>
@@ -166,7 +173,7 @@
                 ><v-icon>mdi-send</v-icon></v-btn
               >
               <v-bottom-sheet v-model="expandGif">
-                <GifSelector v-if="expandGif" @sendGif="selectedGif"  />
+                <GifSelector v-if="expandGif" @sendGif="selectedGif" />
               </v-bottom-sheet>
             </v-form>
 
@@ -191,7 +198,7 @@ import { mapGetters, mapActions } from "vuex";
 import ExpBar from "./ExpStatus";
 import GifSelector from "./GifSelector";
 import CommentCard from "./CommentCard";
-import AddComment from "./AddComment.vue"
+import AddComment from "./AddComment.vue";
 export default {
   components: { ExpBar, GifSelector, CommentCard, AddComment },
   name: "EventCard",
@@ -219,7 +226,7 @@ export default {
       borderColor: null,
       levelColor: null,
       overlay: false,
-      error:null
+      error: null,
     };
   },
   computed: {
@@ -272,29 +279,11 @@ export default {
           this.error = err;
         });
     },
-    commentMessage() {
-      this.$store
-        .dispatch("CommentPost", {
-          messageId: this.event.id,
-          content: this.content,
-          gifUrl: this.gifUrl,
-        })
-        .then(() => {
-          console.log("message commente");
-          this.content = "";
-          this.gifUrl = "";
-          this.preview = null;
-        })
-        .catch((err) => {
-          this.error = err;
-        });
-    },
     selectedGif(gif) {
-      console.log(gif)
       this.preview = gif.url;
       this.gifUrl = gif.url;
       this.formValidity = true;
-      this.expandGif = !this.expandGif
+      this.expandGif = !this.expandGif;
     },
     cleanAttachment() {
       this.preview = null;
@@ -315,7 +304,6 @@ export default {
         });
     },
     destroyComment(payload) {
-      console.log(payload.id);
       this.$store
         .dispatch("DestroyComment", payload.id)
         .then(() => {
@@ -336,7 +324,7 @@ export default {
     },
     forceRerender() {
       this.componentKey += 1;
-      this.comment = !this.comment
+      this.comment = !this.comment;
     },
   },
 };

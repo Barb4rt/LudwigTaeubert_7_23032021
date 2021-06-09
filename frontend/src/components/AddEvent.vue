@@ -2,7 +2,15 @@
   <v-sheet>
     <v-hover v-slot="{ hover }">
       <div>
-        <v-img contain aspect-ratio="1" v-if="preview" :src="preview" class="mx-auto" max-height="25vh"   max-width="75vw">
+        <v-img
+          contain
+          aspect-ratio="1"
+          v-if="preview"
+          :src="preview"
+          class="mx-auto"
+          max-height="25vh"
+          max-width="75vw"
+        >
           <v-fade-transition>
             <v-overlay v-if="hover" absolute>
               <v-btn v-if="hover" fab color="red" @click="cleanAttachment">
@@ -20,9 +28,9 @@
       v-model="formValidity"
       enctype="multipart/form-data"
     >
-      <div  class="d-flex flex-column flex-md-row ">
+      <div class="d-flex flex-column flex-md-row">
         <v-textarea
-        height="50"
+          height="50"
           label="Que voulez-vous partager ?"
           v-model="content"
           :counter="150"
@@ -32,14 +40,19 @@
           auto-grow
           value
         />
-        </div>
-        
-        <div class="d-flex align-baseline justify-end my-2">
-          <v-btn icon outlined id="uploadBtn" class="d-flex justify-center align-center">
-          <v-file-input
-          height="20"
-          class="ma-0 pa-0  ml-2"
+      </div>
+
+      <div class="d-flex align-baseline justify-end my-2">
+        <v-btn
           icon
+          outlined
+          id="uploadBtn"
+          class="d-flex justify-center align-center"
+        >
+          <v-file-input
+            height="20"
+            class="ma-0 pa-0 ml-2"
+            icon
             label="Ajouter une image"
             hide-input
             prepend-icon="mdi-image"
@@ -47,47 +60,68 @@
             id="file"
             @change="selectFile"
           />
-          </v-btn>
-          <v-btn
+        </v-btn>
+        <v-btn
           class="ml-3"
-            outlined
-            icon
-            type="button"
-            name="button"
-            @click="(gifVisibility = !gifVisibility)"
-            ><v-icon >mdi-gif</v-icon></v-btn
-          >
-        </div>
-        <v-divider class="mx-8 my-2"></v-divider>
-      <div>Ca parle de quoi ? <span class="text-subtitle-2">(Obligatoire)</span></div>
-    
-    <v-chip-group v-model="value" mandatory show-arrows active-class="primary--text" class="mb-5">
-      <v-chip v-for="tag in tags" :key="tag" :value="tag">
-        {{ tag }}
-      </v-chip>
-    </v-chip-group>
+          outlined
+          icon
+          type="button"
+          name="button"
+          @click="gifVisibility = !gifVisibility"
+          ><v-icon>mdi-gif</v-icon></v-btn
+        >
+      </div>
+      <v-divider class="mx-8 my-2"></v-divider>
+      <div>
+        Ca parle de quoi ? <span class="text-subtitle-2">(Obligatoire)</span>
+      </div>
+
+      <v-chip-group
+        v-model="value"
+        mandatory
+        show-arrows
+        active-class="primary--text"
+        class="mb-5"
+      >
+        <v-chip v-for="tag in tags" :key="tag" :value="tag">
+          {{ tag }}
+        </v-chip>
+      </v-chip-group>
       <div class="d-flex justify-end">
-        <v-btn class="d-none d-md-flex" type="submit" :disabled="!formValidity" name="button">Envoyer</v-btn>
-         <v-btn fab
-         color="blue"
-                  dark
-                    fixed
-                    bottom
-                    right class="d-md-none d-flex" type="submit" :disabled="!formValidity" name="button"><v-icon>mdi-send</v-icon></v-btn>
+        <v-btn
+          class="d-none d-md-flex"
+          type="submit"
+          :disabled="!formValidity"
+          name="button"
+          >Envoyer</v-btn
+        >
+        <v-btn
+          fab
+          color="blue"
+          dark
+          fixed
+          bottom
+          right
+          class="d-md-none d-flex"
+          type="submit"
+          :disabled="!formValidity"
+          name="button"
+          ><v-icon>mdi-send</v-icon></v-btn
+        >
       </div>
     </v-form>
     <v-bottom-sheet v-model="gifVisibility">
       <GifSelector v-if="gifVisibility" @sendGif="selectedGif" />
-    </v-bottom-sheet> 
+    </v-bottom-sheet>
     <p>{{ error }}</p>
   </v-sheet>
 </template>
 
 <script>
-import GifSelector from "./GifSelector"
+import GifSelector from "./GifSelector";
 export default {
   components: {
-    GifSelector
+    GifSelector,
   },
   data() {
     return {
@@ -113,10 +147,10 @@ export default {
         "Animaux",
       ],
       value: [],
-       messageRules: [
+      messageRules: [
         (value) => !!value || "Un message est requis",
-        (value) => value.length <= 150 || "150 Caractères maximum"
-      ]
+        (value) => value.length <= 150 || "150 Caractères maximum",
+      ],
     };
   },
   methods: {
@@ -132,7 +166,7 @@ export default {
       this.$store
         .dispatch("CreatePost", data)
         .then(() => {
-            this.$emit('post-sending')
+          this.$emit("post-sending");
         })
         .catch((err) => {
           this.error = err.response.data.error;
@@ -144,11 +178,10 @@ export default {
       this.gifUrl = null;
     },
     selectedGif(gif) {
-      console.log(gif.url);
       this.preview = gif.url;
       this.gifUrl = gif.url;
       this.attachment = null;
-      this.gifVisibility = false
+      this.gifVisibility = false;
     },
     cleanAttachment() {
       this.attachment = null;
@@ -159,5 +192,4 @@ export default {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
