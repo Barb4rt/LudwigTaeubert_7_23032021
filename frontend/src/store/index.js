@@ -9,12 +9,12 @@ Vue.use(Vuex);
 const state = {
   user: null,
   events: [],
-  filteredPost:[],
+  filteredPost: null,
   userProfil: null,
   listOfUsers: null,
-  status: 'pending',
-  post:null,
-  userToShow:null
+  status: "pending",
+  post: null,
+  userToShow: null,
 };
 
 export default new Vuex.Store({

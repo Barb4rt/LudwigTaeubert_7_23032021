@@ -1,14 +1,16 @@
 <template>
-  <v-container
-    fluid
-    transition="scroll-y-transition"
-    class="mt-5 mb-5 pa-md-4 mx-lg-auto"
-    outlined
-  >
-    <div class="overline mb-4">Ajouter un message</div>
+  <v-sheet>
     <v-hover v-slot="{ hover }">
       <div>
-        <v-img v-if="preview" :src="preview" class="mx-auto" max-width="50%">
+        <v-img
+          contain
+          aspect-ratio="1"
+          v-if="preview"
+          :src="preview"
+          class="mx-auto"
+          max-height="25vh"
+          max-width="75vw"
+        >
           <v-fade-transition>
             <v-overlay v-if="hover" absolute>
               <v-btn v-if="hover" fab color="red" @click="cleanAttachment">
@@ -19,87 +21,111 @@
         </v-img>
       </div>
     </v-hover>
-
-    <h2 class="title mb-2">Ca parle de quoi ?</h2>
-    <p class="subheader mb-2">(Obligatoire)</p>
-    <v-chip-group v-model="value" mandatory active-class="primary--text" column>
-      <v-chip v-for="tag in tags" :key="tag" :value="tag">
-        {{ tag }}
-      </v-chip>
-    </v-chip-group>
     <v-form
-      class="d-flex flex-column pa-2 space-between"
+      ref="messageForm"
+      class="d-flex flex-column pa-2 mt-2"
       @submit.prevent="addEvent()"
+      v-model="formValidity"
       enctype="multipart/form-data"
     >
-      <div class="d-flex">
-        <v-text-field
+      <div class="d-flex flex-column flex-md-row">
+        <v-textarea
+          height="50"
           label="Que voulez-vous partager ?"
           v-model="content"
+          :counter="150"
+          :rules="messageRules"
           type="text"
           name="content"
+          auto-grow
           value
         />
-        <div class="d-flex align-center">
+      </div>
+
+      <div class="d-flex align-baseline justify-end my-2">
+        <v-btn
+          icon
+          outlined
+          id="uploadBtn"
+          class="d-flex justify-center align-center"
+        >
           <v-file-input
+            height="20"
+            class="ma-0 pa-0 ml-2"
+            icon
             label="Ajouter une image"
             hide-input
-            prepend-icon="mdi-camera"
+            prepend-icon="mdi-image"
             type="file"
             id="file"
             @change="selectFile"
           />
-          <v-btn
-            class="d-flex align-center"
-            icon
-            type="button"
-            name="button"
-            @click="getGif(), (gifHidden = !gifHidden)"
-            ><v-icon>mdi-gif</v-icon></v-btn
-          >
-        </div>
+        </v-btn>
+        <v-btn
+          class="ml-3"
+          outlined
+          icon
+          type="button"
+          name="button"
+          @click="gifVisibility = !gifVisibility"
+          ><v-icon>mdi-gif</v-icon></v-btn
+        >
       </div>
+      <v-divider class="mx-8 my-2"></v-divider>
       <div>
-        <v-btn type="submit" name="button">Envoyer</v-btn>
+        Ca parle de quoi ? <span class="text-subtitle-2">(Obligatoire)</span>
+      </div>
+
+      <v-chip-group
+        v-model="value"
+        mandatory
+        show-arrows
+        active-class="primary--text"
+        class="mb-5"
+      >
+        <v-chip v-for="tag in tags" :key="tag" :value="tag">
+          {{ tag }}
+        </v-chip>
+      </v-chip-group>
+      <div class="d-flex justify-end">
+        <v-btn
+          class="d-none d-md-flex"
+          type="submit"
+          :disabled="!formValidity"
+          name="button"
+          >Envoyer</v-btn
+        >
+        <v-btn
+          fab
+          color="blue"
+          dark
+          fixed
+          bottom
+          right
+          class="d-md-none d-flex"
+          type="submit"
+          :disabled="!formValidity"
+          name="button"
+          ><v-icon>mdi-send</v-icon></v-btn
+        >
       </div>
     </v-form>
-    <v-sheet v-show="!gifHidden" class="mx-auto" elevation="0">
-      <v-text-field
-        label="Rechercher un gif"
-        v-model="searchGif"
-        type="text"
-        name="searchGif"
-        value
-        :append-icon="searchIcon"
-        @click:append="getSearchedGif()"
-      />
-      <v-slide-group class="pa-4" mandatory show-arrows>
-        <v-slide-item
-          v-for="(gif, index) in gifList"
-          :key="index"
-          class="d-flex child-flex"
-          v-slot="{ toggle }"
-        >
-          <v-card class="ma-4" height="200" width="100" @click="toggle">
-            <v-img
-              :src="gif.images.downsized.url"
-              :lazy-src="gif.images.downsized.url"
-              class="grey lighten-2"
-              @click="selectedGif(gif.images.downsized.url)"
-            ></v-img>
-          </v-card>
-        </v-slide-item>
-      </v-slide-group>
-    </v-sheet>
+    <v-bottom-sheet v-model="gifVisibility">
+      <GifSelector v-if="gifVisibility" @sendGif="selectedGif" />
+    </v-bottom-sheet>
     <p>{{ error }}</p>
-  </v-container>
+  </v-sheet>
 </template>
 
 <script>
-import axios from "axios";
+import GifSelector from "./GifSelector";
 export default {
+  components: {
+    GifSelector,
+  },
   data() {
     return {
+      formValidity: false,
       content: "",
       attachment: null,
       preview: null,
@@ -107,27 +133,28 @@ export default {
       uploadError: null,
       error: null,
       post: {},
-      searchGif: "",
-      gifList: [],
       isActive: false,
-      searchIcon: "mdi-magnify",
-      gifHidden: true,
+      gifVisibility: false,
       tags: [
-        "Work",
-        "Home Improvement",
-        "Vacation",
-        "Food",
-        "Drawers",
-        "Shopping",
-        "Art",
-        "Tech",
+        "Monde professionnel",
+        "Développement personnel",
+        "Détente",
+        "Artistique",
+        "Technologie",
+        "Bon plans",
+        "Histoire",
+        "Découvertes",
+        "Animaux",
       ],
       value: [],
+      messageRules: [
+        (value) => !!value || "Un message est requis",
+        (value) => value.length <= 150 || "150 Caractères maximum",
+      ],
     };
   },
   methods: {
     addEvent() {
-      console.log("fichier detecter");
       let data = new FormData();
       if (!this.attachment) {
         data.append("gif", this.gifUrl);
@@ -139,11 +166,7 @@ export default {
       this.$store
         .dispatch("CreatePost", data)
         .then(() => {
-          this.content = ''
-          this.attachment = null
-          this.preview = null
-          this.gifUrl = null
-
+          this.$emit("post-sending");
         })
         .catch((err) => {
           this.error = err.response.data.error;
@@ -155,41 +178,15 @@ export default {
       this.gifUrl = null;
     },
     selectedGif(gif) {
-      this.preview = gif;
-      this.gifUrl = gif;
+      this.preview = gif.url;
+      this.gifUrl = gif.url;
       this.attachment = null;
+      this.gifVisibility = false;
     },
     cleanAttachment() {
       this.attachment = null;
       this.preview = null;
       this.gifUrl = null;
-    },
-    getGif() {
-      axios
-        .get(
-          `https://api.giphy.com/v1/gifs/trending?api_key=G1mQgUOk1qn3WGJodRRqK1gf1lIXAO3t&limit=24&rating=g`
-        )
-        .then((res) => {
-          console.log(res.data);
-          this.gifList = [];
-          this.gifList = res.data.data;
-        })
-        .catch((err) => {
-          this.error = err.response.data.error;
-        });
-    },
-    getSearchedGif() {
-      axios
-        .get(
-          `https://api.giphy.com/v1/gifs/search?api_key=G1mQgUOk1qn3WGJodRRqK1gf1lIXAO3t&q=${this.searchGif}&limit=48&offset=0&rating=g&lang=fr`
-        )
-        .then((res) => {
-          console.log(res.data);
-          this.gifList = res.data.data;
-        })
-        .catch((err) => {
-          this.error = err.response.data.error;
-        });
     },
   },
 };

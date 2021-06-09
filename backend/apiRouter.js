@@ -15,9 +15,11 @@ exports.router = (function(){
     apiRouter.route('/users/all/').get(usersCtrl.getAllUsers);
     apiRouter.route('/user/me/').put(multerProfile,usersCtrl.updateUserProfile);
     apiRouter.route('/user/:id').delete(usersCtrl.destroyUser)
+    apiRouter.route('/admin/users/:id').delete(usersCtrl.adminDestroyUser)
 
     apiRouter.route('/messages/new/').post(multerMsg,messageCtrl.createMessage);
     apiRouter.route('/messages/:id').delete(messageCtrl.destroyMessage);
+    apiRouter.route('/admin/messages/:id').delete(messageCtrl.adminDestroyMessage);
     apiRouter.route('/messages/').get(messageCtrl.listMessages);
 
     apiRouter.route('/message/comment').post(commentCtrl.createComment);

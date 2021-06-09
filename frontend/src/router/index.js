@@ -7,6 +7,7 @@ import Thread from "../views/Thread";
 import PrivateThread from "../views/PrivateThread";
 import userDashboard from "../views/UserDashboard";
 import userProfil from "../views/UserProfil";
+import adminDashboard from "../views/AdminDashboard";
 Vue.use(VueRouter);
 
 const routes = [
@@ -32,7 +33,7 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: "/thread/privatethread",
+    path: "/privatethread",
     name: "privatethread",
     component: PrivateThread,
     meta: { requiresAuth: true },
@@ -47,6 +48,12 @@ const routes = [
     path: "/userprofil",
     name: "userprofil",
     component: userProfil,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/admin",
+    name: "admindashboard",
+    component: adminDashboard,
     meta: { requiresAuth: true },
   },
 ];

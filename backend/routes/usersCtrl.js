@@ -1,9 +1,9 @@
 // Imports
-var bcrypt    = require('bcrypt');
-var jwtUtils  = require('../utils/jwt');
-var models    = require('../models');
-var asyncLib  = require('async');
-var fs = require('fs')
+const bcrypt    = require('bcrypt');
+const jwtUtils  = require('../utils/jwt');
+const models    = require('../models');
+const asyncLib  = require('async');
+const fs = require('fs')
 
 // Constants
 const EMAIL_REGEX     = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -14,10 +14,11 @@ module.exports = {
   register: (req, res) => {
     
     // Params
-    var email    = req.body.email;
-    var username = req.body.username;
-    var password = req.body.password;
-    var bio      = req.body.bio;
+    const email    = req.body.email;
+    const username = req.body.username;
+    const password = req.body.password;
+    const bio      = req.body.bio;
+    const tags = req.body.tags;
     let profilePicture =
     () => {
       if(req.file){
@@ -25,14 +26,16 @@ module.exports = {
       }return  `${req.protocol}://${req.get('host')}/images/profilesPicture/DefaultPP.jpeg`
     }
 
-    if (email == null || username == null || password == null) {
+    if (email == null || username == null || password == null || tags === null) {
       return res.status(400).json({ 'error': 'missing parameters' });
     }
 
     if (username.length >= 13 || username.length <= 4) {
       return res.status(400).json({ 'error': 'wrong username (must be length 5 - 12)' });
     }
-
+    if (tags.split(',').length > 3 ){
+      return res.status(400).json({ 'error': 'wrong number of tag (must be 1 - 3)' });
+    }
     if (!EMAIL_REGEX.test(email)) {
       return res.status(400).json({ 'error': 'email is not valid' });
     }
@@ -43,6 +46,8 @@ module.exports = {
 
     asyncLib.waterfall([
       (done) => {
+        console.log(tags);
+        console.log(tags.split(',').length );
         models.User.findOne({
           attributes: ['email'],
           where: { email: email }
@@ -64,11 +69,12 @@ module.exports = {
         }
       },
       (userFound, bcryptedPassword, done) => {
-        var newUser = models.User.create({
+        const newUser = models.User.create({
           email: email,
           username: username,
           password: bcryptedPassword,
           bio: bio,
+          tags: tags,
           exp: 0,
           profilePicture: profilePicture(),
           isAdmin: 0
@@ -82,11 +88,18 @@ module.exports = {
       }
     ], (newUser) => {
       if (newUser) {
-        return res.status(201).json({
-          'userId': newUser.id,
-          'token': jwtUtils.generateTokenForUser(newUser),
-        });
-      } else {
+        models.User.findOne({
+          where: { email: email },
+          attributes: [ 'id','username','exp','tags', 'bio','profilePicture' ]
+        }).then((userFound) => {
+          return res.status(201).json({
+            'user': userFound,
+            'token': jwtUtils.generateTokenForUser(userFound),
+          });
+        }).catch(() => {
+          return res.status(500).json({ 'error': 'cannot log on user' });
+        })
+      }else {
         return res.status(500).json({ 'error': 'cannot add user' });
       }
     });
@@ -94,8 +107,8 @@ module.exports = {
   login: (req, res) => {
     
     // Params
-    var email    = req.body.email;
-    var password = req.body.password;
+    const email    = req.body.email;
+    const password = req.body.password;
 
     if (email == null ||  password == null) {
       return res.status(400).json({ 'error': 'missing parameters' });
@@ -104,7 +117,8 @@ module.exports = {
     asyncLib.waterfall([
       (done) => {
         models.User.findOne({
-          where: { email: email }
+          where: { email: email },
+          
         })
         .then((userFound) => {
           done(null, userFound);
@@ -131,10 +145,17 @@ module.exports = {
       }
     ], (userFound) => {
       if (userFound) {
-        return res.status(201).json({
-          'userId': userFound.id,
-          'token': jwtUtils.generateTokenForUser(userFound),
-        });
+        models.User.findOne({
+          where: { email: email },
+          attributes: [ 'id','username','exp','tags', 'bio','profilePicture','isAdmin' ]
+        }).then((userFound) => {
+          return res.status(201).json({
+            'user': userFound,
+            'token': jwtUtils.generateTokenForUser(userFound),
+          });
+        }).catch(() => {
+          return res.status(500).json({ 'error': 'cannot log on user' });
+        })
       } else {
         return res.status(500).json({ 'error': 'cannot log on user' });
       }
@@ -142,14 +163,13 @@ module.exports = {
   },
   getUserProfile: (req, res) => {
     // Getting auth header
-    var headerAuth  = req.headers['authorization'];
-    var userId      = jwtUtils.getUserId(headerAuth);
+    const headerAuth  = req.headers['authorization'];
+    const userId      = jwtUtils.getUserId(headerAuth);
 
     if (userId < 0)
       return res.status(400).json({ 'error': 'wrong token' });
-
     models.User.findOne({
-      attributes: [ 'id', 'email', 'username','exp', 'bio','profilePicture' ],
+      attributes: [ 'id', 'username','exp','tags', 'bio','profilePicture','isAdmin' ],
       where: { id: userId }
     }).then((user) => {
       if (user) {
@@ -161,7 +181,6 @@ module.exports = {
       res.status(500).json({ 'error': 'cannot fetch user' });
     });
   },
-
   getAllUsers: (req, res) => {
     // Getting auth header
     models.User.findAll({
@@ -178,8 +197,8 @@ module.exports = {
   },
   updateUserProfile: (req, res) => {
     // Getting auth header
-    var headerAuth  = req.headers['authorization'];
-    var userId      = jwtUtils.getUserId(headerAuth);
+    const headerAuth  = req.headers['authorization'];
+    const userId      = jwtUtils.getUserId(headerAuth);
 
     // Params
     let newbio = req.body.bio;
@@ -187,7 +206,7 @@ module.exports = {
     asyncLib.waterfall([
       (done) => {
         models.User.findOne({
-          attributes: ['id', 'bio','exp', 'profilePicture', 'username'],
+          attributes: ['id', 'bio','exp','tags', 'profilePicture', 'username'],
           where: { id: userId }
         }).then( (userFound) => {
           done(null, userFound);
@@ -196,14 +215,13 @@ module.exports = {
           return res.status(500).json({ 'error': 'unable to verify user' });
         });
       },
-      (userFound, done) => {
-          
+      (userFound, done) => { 
         if(userFound) {
           const oldProfilePicture = `${req.protocol}://${req.get('host')}/images/profilesPicture/DefaultPP.jpeg`
-           
             fs.unlink(`images/profilesPicture/${oldProfilePicture}`, () => {
               userFound.update({
                 bio: (req.body.bio ? req.body.bio : userFound.bio),
+                tags: (req.body.tags ? req.body.tags : userFound.tags),
                 profilePicture: (req.file ? `${req.protocol}://${req.get('host')}/images/profilesPicture/${req.file.filename}` : userFound.profilePicture) 
               }).then((userFound) => {
               done( userFound)
@@ -276,5 +294,69 @@ module.exports = {
            return res.status(500).json({ 'error': 'cannot post message' });
          }
        })
-     } 
+     },
+     adminDestroyUser : (req, res) => {
+      // Getting auth header
+      const headerAuth  = req.headers['authorization'];
+      const userId      = jwtUtils.getUserId(headerAuth);
+      const isAdmin      = jwtUtils.getIsAdmin(headerAuth);
+      const userToDestroy = req.params.id
+     
+      asyncLib.waterfall([
+        (done) => {
+          console.log(isAdmin);
+          models.User.findOne({
+            where : { id: userId}
+          })
+          .then((adminFound) => {
+           done( null , adminFound)
+          }).catch((err) => {
+            return res.status(500).json({ 'error': 'Impossible de vérifier l\'utilisateur'})
+          });
+        },
+        (adminFound, done) => {
+          models.User.findOne({
+            where : { id: userToDestroy}
+          })
+          .then((userFound) => {
+           done( null ,adminFound,userFound)
+          }).catch((err) => {
+            return res.status(400).json({ 'error': 'Impossible de trouver l\'utilisateur'})
+          });
+        },
+        (adminFound,userFound, done) => {
+          console.log(adminFound);
+          if(isAdmin === true){
+            
+           if(userFound.profilePicture === `${req.protocol}://${req.get('host')}/images/profilesPicture/DefaultPP.jpeg` ){
+            
+            userFound.destroy({
+          }).then((userDestroy) => {
+             done( userDestroy)
+            }).catch((err) => {
+              return res.status(500).json({ 'error': 'Impossible de supprimer l\'utilisateur'})
+            }); 
+         }else{ 
+           const filename = userFound.profilePicture.split('/profilesPicture/')[1];
+           fs.unlink(`images/profilesPicture/${filename}`, () => {
+             userFound.destroy({
+            }).then((userDestroy) => {
+             done( userDestroy)
+            }).catch((err) => {
+              return res.status(500).json({ 'error': 'Impossible de supprimer l\'utilisateur'})
+         }) 
+         })
+        }
+       }else{
+        return res.status(500).json({ 'error': 'Impossible de vérifier l\'administrateur'})
+       }
+    }
+      ],function(userDestroy) {
+           if (userDestroy) {
+             return res.status(201).json({'message' : 'utilisateur supprimée'});
+           } else {
+             return res.status(500).json({ 'error': 'cannot post message' });
+           }
+         })
+       }
 }

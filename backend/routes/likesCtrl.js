@@ -54,8 +54,7 @@ module.exports = {
             }
           })
           .then((likedFound) => {
-            console.log(likedFound);
-            done(null, messageFound, likedFound);
+            done(null, messageFound, userFound, likedFound);
           })
           .catch(() => {
             return res.status(500).json({ 'error': 'Impossible de vérifier si l\'utilisateur à déja liker' });
@@ -64,16 +63,19 @@ module.exports = {
           res.status(404).json({ 'error': 'Impossible de trouver l\'utilisateur' });
         }
       },
-      ( messageFound, likedFound,done) => {
-        console.log(likedFound);
+      ( messageFound, userFound, likedFound ,done) => {
+        
+        console.log(messageFound.id);
+        console.log(userFound.id)
+        console.log(likedFound)
         if(!likedFound) {
           models.Like.create({
-              userId: userId,
-              messageId: messageId
+            messageId: messageFound.id,
+              userId: userFound.id, 
           })
           .then(() => {
             const like = 1
-            done(null,messageFound, like);
+            done(null, messageFound, userFound, like);
           })
           .catch(() => {
             return res.status(500).json({ 'error': 'Impossible de créer le like' });
@@ -85,21 +87,20 @@ module.exports = {
           })
           .then(() => {
             const like = 0
-            done(null,messageFound,like);
+            done(null,messageFound, userFound,like);
           })
           .catch(() => {
             return res.status(500).json({ 'error': 'Impossible de detruire le like' });
           });
       }
     },
-      ( messageFound,like, done) => {
-        console.log(messageFound);
+      ( messageFound, userFound,like, done) => {
         if(like === 1) {
           messageFound.update(
             {likes: messageFound.likes  + 1 }, 
           ).then(() => {
             like = 'liker'
-           done( like )
+           done( null, userFound,like )
           }).catch(() => {
             return res.status(500).json({'error': 'Impossible de mettre à jour le compteur de like'})
           });
@@ -109,12 +110,37 @@ module.exports = {
             {likes: messageFound.likes  - 1 }, 
           ).then(() => {
             like = 'disliker'
-           done( like )
+           done(  null, userFound,like )
           }).catch(() => {
             return res.status(500).json({'error':'Impossible de mettre à jour le compteur de like'})
           });
         }
-      } 
+      },
+      function( userFound,like, done){
+        if(like) {
+          if(like === 'liker'){
+            userFound.update({
+              exp: userFound.exp + 1
+            }).then(function(userFound) {
+              done(userFound);
+            }).catch((err)=>{
+              return res.status(404).json({'error': err})
+          });
+          }
+          else {
+            userFound.update({
+              exp: userFound.exp - 1
+            }).then(function(userFound) {
+              done(userFound);
+            }).catch((err)=>{
+              return res.status(404).json({'error': err})
+          }); 
+        }
+        }
+        else {
+          res.status(500).json({ 'error': 'Impossible de mettre à jour l\'utilisateur' });
+        }
+      }
     ], (like) => {
       if (like) {
         return res.status(201).json({'message': 'Message liker'} );

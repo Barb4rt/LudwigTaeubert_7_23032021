@@ -1,47 +1,40 @@
 <template>
-  <div >
-    
-    <div class="ma-auto">
-      <h1 class="mx-auto">Bienvenue sur Groupomania</h1>
-      To use this app you'll need to
-      <router-link to="/login"> Login </router-link>
-      or
-      <router-link to="/register"> Register </router-link>
-    </div>
+  <div class="main-container d-flex flex-column">
+    <GroupomaniaLogo class="logo" />
 
+    <div class="mx-auto text-center">
+      <h1 class="mx-auto">Bienvenue</h1>
+      <p>Pour utiliser l'application vous devez soit</p>
+      <v-row>
+        <v-col>
+          <v-btn to="/login" color="info"> Se connecter </v-btn>
+        </v-col>
+        <v-col>
+          <v-btn to="/register" color="success"> S'inscrire </v-btn>
+        </v-col>
+      </v-row>
+    </div>
   </div>
 </template>
 
 <script>
+import GroupomaniaLogo from "../components/GroupomaniaLogo.vue";
 import { authComputed } from "../store/helper";
 
 export default {
+  components: { GroupomaniaLogo },
   data() {
-    return{
-show: false
-    }   
+    return {
+      show: false,
+    };
   },
   computed: {
     ...authComputed,
   },
   mounted() {
     this.show = true; // might need this.$nextTick
-  }
+  },
 };
 </script>
 
-<style lang="scss" scoped>
-.logo {
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  align-items: center;
-  height: 300px;
-}
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.5s;
-}
-.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
-  opacity: 0;
-}
-</style>
+<style lang="scss" scoped></style>
