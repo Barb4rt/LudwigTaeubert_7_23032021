@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <v-container fluid class="rounded-xl pa-0 mb-4">
     <v-lazy
       v-model="isActive"
       :options="{
@@ -8,69 +8,69 @@
       min-height="200"
       transition="fade-transition"
     >
-      <div>
-        <div class=" ma-2">
-          <div class="d-flex align-center justify-space-between">
-            <div class="d-inline-flex align-center ">
-            <v-btn icon @click="seeProfil(event.UserId)">
-              <v-avatar :style="levelColor">
-                <v-img :src="profil.profilePicture"></v-img>
-              </v-avatar>
-            </v-btn>
-            <v-btn text @click="seeProfil(event.UserId)">{{
-              profil.username
-            }}</v-btn>
-            <v-chip color="blue" dark class="d-none d-md-flex"
-              ><ExpBar id="level" @level-color="PPBordercolor"  :fullDisplay="false" :exp="profil.exp"
-            /></v-chip>
+      <div min-height="200" class="pa-md-5 pa-3">
+        <div>
+          <div class="d-flex align-center justify-space-between mb-5">
+            <div class="d-inline-flex align-center">
+              <v-btn icon @click="seeProfil(event.UserId)">
+                <v-avatar :style="borderColor">
+                  <v-img :src="profil.profilePicture"></v-img>
+                </v-avatar>
+              </v-btn>
+              <v-btn text @click="seeProfil(event.UserId)">{{
+                profil.username
+              }}</v-btn>
+              <v-chip :color="levelColor" dark class="d-none d-md-flex"
+                ><ExpBar
+                  id="level"
+                  @level-color="PPBordercolor"
+                  :fullDisplay="false"
+                  :exp="profil.exp"
+              /></v-chip>
             </div>
-            <div class="d-inline-flex align-center ">
-            
-            <div>
-              <v-menu transition="slide-x-transition" bottom right>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn icon v-bind="attrs" v-on="on">
-                    <v-icon>mdi-dots-vertical</v-icon>
-                  </v-btn>
-                </template>
-
-                <v-list>
-                  <v-list-item>
-                    <v-list-item-title>Signaler le post</v-list-item-title>
-                  </v-list-item>
-                  <v-list-item v-if="isOwner">
-                    <v-list-item-title @click.prevent="destroyPost"
-                      >Supprimer le post</v-list-item-title
-                    >
-                  </v-list-item>
-                </v-list>
-              </v-menu>
+            <div class="d-inline-flex align-center">
+              <div>
+                <v-menu transition="slide-x-transition" bottom right>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn icon v-bind="attrs" v-on="on">
+                      <v-icon>mdi-dots-vertical</v-icon>
+                    </v-btn>
+                  </template>
+                  <v-list>
+                    <v-list-item>
+                      <v-list-item-action-text
+                        >Signaler le post</v-list-item-action-text
+                      >
+                    </v-list-item>
+                    <v-list-item v-if="isOwner">
+                      <v-list-item-action-text @click.prevent="destroyPost"
+                        >Supprimer le post</v-list-item-action-text
+                      >
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
+              </div>
             </div>
           </div>
-          </div>
-          
         </div>
         <v-img
-          max-width="50%"
-          class="mx-auto"
-          v-show="event.attachment"
+          max-width="100%"
+          class="mx-auto rounded-xl d-flex align-end"
+          v-if="event.attachment"
           :src="event.attachment"
-        ></v-img>
-        <v-card-text
-          class="font-weight-light d-flex flex-column mb-6"
-          >{{ event.content }}</v-card-text
         >
-
-        <div class="d-flex pa-2 mb-6 justify-space-between">
+        </v-img>
+        <v-card-text class="font-weight-light">{{ event.content }}</v-card-text>
+        <div class="d-flex pa-2 mb-md-6 justify-space-between">
           <v-chip
-              v-for="tag in tagArray"
-              :key="tag"
-              :value="tag"
-              class="ma-2"
-              color="red"
-              outlined
-              >{{ tag }}
-            </v-chip>
+            v-for="tag in tagArray"
+            :key="tag"
+            :value="tag"
+            class="ma-2"
+            color="red"
+            outlined
+            >{{ tag }}
+          </v-chip>
           <div class="d-inline-flex align-center">
             <v-icon
               class="mr-1"
@@ -81,13 +81,15 @@
             </v-icon>
             <span class="subheading mr-2">{{ event.likes }}</span>
             <v-spacer class="mx-auto"></v-spacer>
-            <v-icon class="mr-1" @click="expand = !expand"> mdi-comment </v-icon
+            <v-icon class="mr-1" @click="expandComment = !expandComment">
+              mdi-comment </v-icon
             ><span>{{ this.event.Comments.length }}</span>
           </div>
         </div>
 
         <v-expand-transition>
-          <div v-if="expand">
+          <v-container elevation-20 class="rounded-xl" v-show="expandComment === true">
+            <v-divider class="my-2 d-md-none d-sm-flex"></v-divider>
             <v-hover v-slot="{ hover }">
               <div>
                 <v-img
@@ -112,65 +114,30 @@
               </div>
             </v-hover>
             <div class="text-center">
-      <v-btn
-                  class="d-md-none d-sm-flex"
-                  color="blue"
-                  dark
-                  @click="sheet = !sheet"
-                    fab
-                    fixed
-                    bottom
-                    right
-                  >
-                    <v-icon>mdi-pencil</v-icon>
-                  </v-btn>
-                  <div>Ajouter un commentaire</div>
-                  
-      <v-bottom-sheet v-model="sheet">
-        <v-sheet
-          class="text-center"
-        >
-          <v-btn
-            class="mt-6"
-            text
-            color="red"
-            @click="sheet = !sheet"
+              <v-btn class="d-md-none d-sm-flex" @click="comment = !comment">
+                <v-icon>mdi-pencil</v-icon
+                ><span class="ml-2">Ajouter un commentaire</span>
+              </v-btn>
+
+              
+              <v-divider class="my-2 d-md-none d-sm-flex"></v-divider>
+
+              <v-bottom-sheet v-model="comment">
+                <v-sheet class="text-center">
+                  <v-btn
+            fab
+            dark
+            fixed
+            bottom
+            left
+            class="red"
+            @click="comment =!comment"
+            name="button"
+            ><v-icon>mdi-minus</v-icon></v-btn
           >
-            close
-          </v-btn>
-          <div class="py-3">
-            <v-form
-              class=" align-center"
-              @submit.prevent="commentMessage()"
-              enctype="multipart/form-data"
-              v-model="formValidity"
-            >
-              <v-text-field
-                class="pa-2 mx-5 my-2"
-                label="Que voulez-vous ajouter ?"
-                v-model="content"
-                type="text"
-                name="content"
-                :counter="150"
-                value
-                prepend-icon="mdi-pencil"
-                :rules="commentRules"
-              />
-                <v-btn class="mb-3" type="submit" :disabled="!formValidity" name="button">Envoyer</v-btn>
-                <v-btn
-                class="d-flex align-center"
-                icon
-                type="button"
-                name="button"
-                @click="getGif(), (gifHidden = !gifHidden)"
-              >
-                <v-icon>mdi-gif</v-icon></v-btn
-              >
-            </v-form>
-          </div>
-          
-        </v-sheet>
-      </v-bottom-sheet>
+                  <AddComment :eventId="event.id" :key="componentKey" @post-comment="forceRerender"/>
+                </v-sheet>
+              </v-bottom-sheet>
             </div>
             <v-form
               class="d-md-flex align-center d-none"
@@ -187,93 +154,46 @@
                 :counter="150"
                 value
                 prepend-icon="mdi-pencil"
-                :rules="commentRules"
+                append-icon="mdi-gif"
+                @click:append="expandGif = !expandGif"
               />
-                <v-btn class="mb-3" type="submit" :disabled="!formValidity" name="button">Envoyer</v-btn>
-                <v-btn
-                class="d-flex align-center"
+              <v-btn
                 icon
-                type="button"
+                class="mb-3"
+                type="submit"
+                :disabled="!formValidity"
                 name="button"
-                @click="getGif(), (gifHidden = !gifHidden)"
+                ><v-icon>mdi-send</v-icon></v-btn
               >
-                <v-icon>mdi-gif</v-icon></v-btn
-              >
+              <v-bottom-sheet v-model="expandGif">
+                <GifSelector v-if="expandGif" @sendGif="selectedGif"  />
+              </v-bottom-sheet>
             </v-form>
-            <v-sheet v-show="!gifHidden" class="mx-auto" elevation="0">
-              <v-text-field
-                label="Rechercher un gif"
-                v-model="searchGif"
-                type="text"
-                name="searchGif"
-                value
-                :append-icon="searchIcon"
-                @click:append="getSearchedGif()"
-              />
-              <v-slide-group class="pa-4" mandatory show-arrows>
-                <v-slide-item
-                  v-for="(gif, index) in gifList"
-                  :key="index"
-                  class="d-flex child-flex"
-                  v-slot="{ toggle }"
-                >
-                  <v-card class="ma-4" height="200" width="100" @click="toggle">
-                    <v-img
-                      :src="gif.images.downsized.url"
-                      :lazy-src="gif.images.downsized.url"
-                      class="grey lighten-2"
-                      @click="selectedGif(gif.images.downsized.url)"
-                    ></v-img>
-                  </v-card>
-                </v-slide-item>
-              </v-slide-group>
-            </v-sheet>
-            <v-virtual-scroll
-              :bench="benched"
-              :items="this.event.Comments"
-              height="300"
-              item-height="200"
-            >
-              <template v-slot:default="{ item }">
-                <v-list-item  :key="item.id">
-                  <v-list-item-avatar>
-                    <v-img :src="item.User.profilePicture"></v-img>
-                  </v-list-item-avatar>
-                  <v-list-item-content>
-                    
-                    <v-list-item-title
-                      v-html="item.User.username"
-                    ></v-list-item-title>
-                    <div id="gifContent"   v-if="item.gifUrl">
-                        <v-img id="gif" contain max-height="150" class="rounded-xl"  aspect-ratio="1"  :src="item.gifUrl" ></v-img>
-                    </div>
-                    <v-list-item-subtitle
-                      v-html="item.content"
-                    ></v-list-item-subtitle>
-                  </v-list-item-content>
-                  <v-list-item-action @click="destroyComment(item.id)"
-                    ><v-icon>mdi-delete</v-icon></v-list-item-action
-                  >
-                </v-list-item>
 
-                <v-divider></v-divider>
-              </template>
-            </v-virtual-scroll>
-          </div>
+            <div hide-on-scroll id="commentList" class="px-2">
+              <CommentCard
+                v-for="comment in event.Comments"
+                :key="comment.id"
+                :comment="comment"
+                @delete="destroyComment"
+                :isOwner="isOwner"
+              />
+            </div>
+          </v-container>
         </v-expand-transition>
       </div>
     </v-lazy>
-
-    <v-divider inset class="mx-auto mb-15"></v-divider>
-  </div>
+  </v-container>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
 import ExpBar from "./ExpStatus";
-import axios from "axios";
+import GifSelector from "./GifSelector";
+import CommentCard from "./CommentCard";
+import AddComment from "./AddComment.vue"
 export default {
-  components: { ExpBar },
+  components: { ExpBar, GifSelector, CommentCard, AddComment },
   name: "EventCard",
   props: {
     event: {
@@ -285,23 +205,21 @@ export default {
   },
   data() {
     return {
-      sheet: false,
+      comment: false,
       formValidity: false,
-      expand: false,
+      expandComment: false,
       isHidden: true,
       content: "",
       isActive: false,
       benched: 0,
-      gifList: [],
-      gifHidden: true,
+      expandGif: false,
       gifUrl: null,
       preview: null,
-      searchIcon: "mdi-magnify",
-      searchGif: "",
-      commentRules: [
-        (value) => value.length < 150 || "Le nom d'utilisateur doit avoir entre 5 et 12 caractère"
-      ],
-      levelColor: '' 
+      componentKey: 0,
+      borderColor: null,
+      levelColor: null,
+      overlay: false,
+      error:null
     };
   },
   computed: {
@@ -359,55 +277,29 @@ export default {
         .dispatch("CommentPost", {
           messageId: this.event.id,
           content: this.content,
-          gifUrl: this.gifUrl
+          gifUrl: this.gifUrl,
         })
         .then(() => {
           console.log("message commente");
-          this.content = ''
-          this.gifUrl =''
-          this.preview = null
-          this.gifHidden = true
+          this.content = "";
+          this.gifUrl = "";
+          this.preview = null;
         })
         .catch((err) => {
           this.error = err;
         });
     },
-    getGif() {
-      axios
-        .get(
-          `https://api.giphy.com/v1/gifs/trending?api_key=G1mQgUOk1qn3WGJodRRqK1gf1lIXAO3t&limit=24&rating=g`
-        )
-        .then((res) => {
-          console.log(res.data);
-          this.gifList = [];
-          this.gifList = res.data.data;
-        })
-        .catch((err) => {
-          this.error = err.response.data.error;
-        });
-    },
-    getSearchedGif() {
-      axios
-        .get(
-          `https://api.giphy.com/v1/gifs/search?api_key=G1mQgUOk1qn3WGJodRRqK1gf1lIXAO3t&q=${this.searchGif}&limit=48&offset=0&rating=g&lang=fr`
-        )
-        .then((res) => {
-          console.log(res.data);
-          this.gifList = res.data.data;
-        })
-        .catch((err) => {
-          this.error = err.response.data.error;
-        });
-    },
     selectedGif(gif) {
-      this.preview = gif;
-      this.gifUrl = gif;
-      this.formValidity = true
+      console.log(gif)
+      this.preview = gif.url;
+      this.gifUrl = gif.url;
+      this.formValidity = true;
+      this.expandGif = !this.expandGif
     },
     cleanAttachment() {
       this.preview = null;
       this.gifUrl = null;
-      this.formValidity = false
+      this.formValidity = false;
     },
     likeMessage() {
       let data = {
@@ -422,10 +314,10 @@ export default {
           this.error = err;
         });
     },
-    destroyComment(comment) {
-      console.log(comment);
+    destroyComment(payload) {
+      console.log(payload.id);
       this.$store
-        .dispatch("DestroyComment", comment)
+        .dispatch("DestroyComment", payload.id)
         .then(() => {
           console.log("commentaire supprimer");
         })
@@ -438,23 +330,30 @@ export default {
         this.$router.push({ name: "userprofil" });
       });
     },
-    PPBordercolor(payload){
-       this.levelColor = `border: 3px solid ${payload.color}` 
-    }
+    PPBordercolor(payload) {
+      this.borderColor = `border: 3px solid ${payload.color}`;
+      this.levelColor = payload.color;
+    },
+    forceRerender() {
+      this.componentKey += 1;
+      this.comment = !this.comment
+    },
   },
 };
 </script>
 
-<style  scoped>
+<style scoped>
 .green {
   color: green;
 }
 
-#gifContent{
-  
-
-}
-#gif{
+#gif {
   overflow: hidden;
-  }
+}
+
+#commentList {
+  max-height: 300px;
+  overflow: scroll;
+  overflow-x: hidden;
+}
 </style>

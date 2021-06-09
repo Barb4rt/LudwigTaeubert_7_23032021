@@ -1,22 +1,45 @@
 <template>
-  <v-app-bar elevation="5" app   v-if="loggedIn == true"
+  <v-app-bar hide-on-scroll elevation="5" app fixed  v-if="loggedIn == true"
       clipped >
-    <v-app-bar-nav-icon class="d-md-none" @click="expandDrawer"  ></v-app-bar-nav-icon>
+    <v-app-bar-nav-icon class="d-lg-none" @click="expandDrawer"  ></v-app-bar-nav-icon>
+    <v-btn class="d-none d-lg-flex" @click="expandDrawer" fab icon > <UserConnect  :profil="userConnect" :onlyProfilePicture="true" /></v-btn>
+      <v-spacer class="d-xs-none" ></v-spacer>
     <v-btn
+      class="d-none d-md-flex"
       text
       rounded
       to="/thread"
-      v-if="loggedIn"
-    > What's new ?
+    > <v-icon>mdi-earth</v-icon><span class="ml-2">Place public</span>
+    </v-btn>
+     <v-btn
+  class="d-md-none d-sm-flex"
+     icon
+      to="/thread"
+    ><v-icon>mdi-earth</v-icon>
     </v-btn>
     <v-spacer class="d-xs-none" ></v-spacer>
     <v-btn
+    class="d-none d-md-flex"
       text
       rounded
       to="/privatethread"
-    > Private
+    > <v-icon>mdi-account</v-icon><span class="ml-2" >Place personnel</span>
+    </v-btn>
+    <v-btn
+    class="d-md-none d-sm-flex"
+     icon
+      to="/privatethread"
+    ><v-icon>mdi-account</v-icon>
     </v-btn>
     <v-spacer class="d-xs-none"></v-spacer>
+    <v-btn
+    v-if="userConnect.isAdmin === true"
+    class="d-none d-md-flex"
+      text
+      rounded
+      to="/admin"
+    > <v-icon>mdi-account</v-icon><span class="ml-2" >Admin</span>
+    </v-btn>
   </v-app-bar>
 </template>
 
@@ -24,16 +47,11 @@
 
 import { authComputed } from "../store/helper";
 import { mapGetters, mapActions, mapState } from "vuex";
+import UserConnect from "./UserConnect";
 
 export default {
-  
-  props: {
-    isMobile: {
-      type: Boolean,
-      default: () => {
-        return false;
-      },
-    },
+  components: {
+    UserConnect
   },
   watch: {
    status(newVal, oldVal){
@@ -63,7 +81,7 @@ export default {
       try {
         await this.GetUserProfil();
         this.profil = this.userConnect;
-        console.log('chargement');
+        console.log(this.profil);
       }catch (e) {
         console.log(e);
       }

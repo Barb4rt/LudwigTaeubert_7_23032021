@@ -22,6 +22,9 @@ export default {
   destroyProfil(data){
     return axios.delete(`${endpoint}/user/${data}`)
   },
+  adminDestroyProfil(data){
+    return axios.delete(`${endpoint}/admin/users/${data}`)
+  },
   //Post routes
   createPost(){
     return axios.post(`${endpoint}/messages/new/`)
@@ -31,6 +34,9 @@ export default {
   },
   destroyPost(data){
     return axios.delete(`${endpoint}/messages/${data}`)
+  },
+  adminDestroyPost(data){
+    return axios.delete(`${endpoint}/admin/messages/${data}`)
   },
   likePost(data){
     return axios.post(`${endpoint}/messages/like`, data)

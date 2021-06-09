@@ -147,7 +147,7 @@ module.exports = {
       if (userFound) {
         models.User.findOne({
           where: { email: email },
-          attributes: [ 'id','username','exp','tags', 'bio','profilePicture' ]
+          attributes: [ 'id','username','exp','tags', 'bio','profilePicture','isAdmin' ]
         }).then((userFound) => {
           return res.status(201).json({
             'user': userFound,
@@ -168,9 +168,8 @@ module.exports = {
 
     if (userId < 0)
       return res.status(400).json({ 'error': 'wrong token' });
-
     models.User.findOne({
-      attributes: [ 'id', 'username','exp','tags', 'bio','profilePicture' ],
+      attributes: [ 'id', 'username','exp','tags', 'bio','profilePicture','isAdmin' ],
       where: { id: userId }
     }).then((user) => {
       if (user) {
@@ -182,7 +181,6 @@ module.exports = {
       res.status(500).json({ 'error': 'cannot fetch user' });
     });
   },
-
   getAllUsers: (req, res) => {
     // Getting auth header
     models.User.findAll({
@@ -208,7 +206,7 @@ module.exports = {
     asyncLib.waterfall([
       (done) => {
         models.User.findOne({
-          attributes: ['id', 'bio','exp', 'profilePicture', 'username'],
+          attributes: ['id', 'bio','exp','tags', 'profilePicture', 'username'],
           where: { id: userId }
         }).then( (userFound) => {
           done(null, userFound);
@@ -217,13 +215,13 @@ module.exports = {
           return res.status(500).json({ 'error': 'unable to verify user' });
         });
       },
-      (userFound, done) => {
-          
+      (userFound, done) => { 
         if(userFound) {
           const oldProfilePicture = `${req.protocol}://${req.get('host')}/images/profilesPicture/DefaultPP.jpeg`
             fs.unlink(`images/profilesPicture/${oldProfilePicture}`, () => {
               userFound.update({
                 bio: (req.body.bio ? req.body.bio : userFound.bio),
+                tags: (req.body.tags ? req.body.tags : userFound.tags),
                 profilePicture: (req.file ? `${req.protocol}://${req.get('host')}/images/profilesPicture/${req.file.filename}` : userFound.profilePicture) 
               }).then((userFound) => {
               done( userFound)
@@ -296,5 +294,69 @@ module.exports = {
            return res.status(500).json({ 'error': 'cannot post message' });
          }
        })
-     } 
+     },
+     adminDestroyUser : (req, res) => {
+      // Getting auth header
+      const headerAuth  = req.headers['authorization'];
+      const userId      = jwtUtils.getUserId(headerAuth);
+      const isAdmin      = jwtUtils.getIsAdmin(headerAuth);
+      const userToDestroy = req.params.id
+     
+      asyncLib.waterfall([
+        (done) => {
+          console.log(isAdmin);
+          models.User.findOne({
+            where : { id: userId}
+          })
+          .then((adminFound) => {
+           done( null , adminFound)
+          }).catch((err) => {
+            return res.status(500).json({ 'error': 'Impossible de vérifier l\'utilisateur'})
+          });
+        },
+        (adminFound, done) => {
+          models.User.findOne({
+            where : { id: userToDestroy}
+          })
+          .then((userFound) => {
+           done( null ,adminFound,userFound)
+          }).catch((err) => {
+            return res.status(400).json({ 'error': 'Impossible de trouver l\'utilisateur'})
+          });
+        },
+        (adminFound,userFound, done) => {
+          console.log(adminFound);
+          if(isAdmin === true){
+            
+           if(userFound.profilePicture === `${req.protocol}://${req.get('host')}/images/profilesPicture/DefaultPP.jpeg` ){
+            
+            userFound.destroy({
+          }).then((userDestroy) => {
+             done( userDestroy)
+            }).catch((err) => {
+              return res.status(500).json({ 'error': 'Impossible de supprimer l\'utilisateur'})
+            }); 
+         }else{ 
+           const filename = userFound.profilePicture.split('/profilesPicture/')[1];
+           fs.unlink(`images/profilesPicture/${filename}`, () => {
+             userFound.destroy({
+            }).then((userDestroy) => {
+             done( userDestroy)
+            }).catch((err) => {
+              return res.status(500).json({ 'error': 'Impossible de supprimer l\'utilisateur'})
+         }) 
+         })
+        }
+       }else{
+        return res.status(500).json({ 'error': 'Impossible de vérifier l\'administrateur'})
+       }
+    }
+      ],function(userDestroy) {
+           if (userDestroy) {
+             return res.status(201).json({'message' : 'utilisateur supprimée'});
+           } else {
+             return res.status(500).json({ 'error': 'cannot post message' });
+           }
+         })
+       }
 }

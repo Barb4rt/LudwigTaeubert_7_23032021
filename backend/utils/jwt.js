@@ -27,5 +27,17 @@ module.exports = {
             }catch(err){ }
         }
         return userId;
+    },
+    getIsAdmin: function(authorization) {
+        let isAdmin = -1;
+        let token = module.exports.parseAuthorization(authorization);
+        if(token != null) {
+            try{
+                let jwtToken = jwt.verify(token, JWT_SIGN_SECRET);
+                if(jwtToken != null)
+                isAdmin = jwtToken.isAdmin;
+            }catch(err){ }
+        }
+        return isAdmin;
     }
 }

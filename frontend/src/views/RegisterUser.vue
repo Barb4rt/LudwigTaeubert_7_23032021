@@ -1,8 +1,10 @@
 <template>
-  <v-container>
-    <v-row>
-      <v-col>
-        <h1>Signup</h1>
+<div class="main-container d-flex justify-center my-auto align-center  flex-column  "  transition="fade-in">
+      <v-card  max-width="95vw"  class="mx-auto  rounded-xl">
+        <v-card-title>
+        <h1 class="display-1 text-center mx-auto">S'inscrire</h1>
+        </v-card-title>
+        <v-card-text>
         <v-form
           ref="signUpForm"
           v-model="formValidity"
@@ -35,7 +37,7 @@
           />
           <h2 class="title mb-2">Vos sujets préférer ?</h2>
     <p class="subheader mb-2">(Obligatoire)</p>
-    <v-chip-group v-model="value" multiple active-class="primary--text" :rules="tagsRules" column required>
+    <v-chip-group v-model="value" max="3" mandatory multiple show-arrows active-class="success" class="mb-5">
       <v-chip v-for="tag in tags" :key="tag" :value="tag">
         {{ tag }}
       </v-chip>
@@ -46,6 +48,7 @@
             @change="selectFile"
             required
           ></v-file-input>
+          <v-card-actions class="d-flex justify-space-around">
           <v-btn
             type="submit"
             color="primary"
@@ -53,22 +56,17 @@
             :disabled="!formValidity"
             >Submit</v-btn
           >
-          <v-btn color="success" class="mr-4" @click="validateForm"
-            >Validate Form</v-btn
-          >
-          <v-btn color="warning" class="mr-4" @click="resetValidation"
-            >Reset Validation</v-btn
-          >
-          <v-btn color="error" @click="resetForm">Reset</v-btn>
-
-          <router-link to="/login">
-            Already have an account? Login.
+          <v-btn color="error" @click="resetForm">Effacer</v-btn>
+          </v-card-actions>
+          <router-link class="text-center mx-auto " to="/login">
+             <p class="text-center mt-2">Already have an account? Login.</p>
           </router-link>
         </v-form>
-        <p>{{ error }}</p>
-      </v-col>
-    </v-row>
-  </v-container>
+        </v-card-text>
+        <v-divider v-if="error"></v-divider>
+        <p class="text-center red--text mt-2">{{ error }}</p>
+      </v-card>
+</div>
 </template>
 
 <script>
@@ -115,7 +113,7 @@ export default {
         "Découvertes",
         "Animaux",
       ],
-      value: null,
+      value: [],
     };
   },
   methods: {
@@ -125,7 +123,7 @@ export default {
       data.append("email", this.email);
       data.append("password", this.password);
       data.append("image", this.profilePicture);
-      data.append("tags", this.value)
+      data.append("tags", this.value.toString())
       this.$store
         .dispatch("Register", data)
         .then(() => {

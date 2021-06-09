@@ -1,0 +1,11 @@
+1- télecharger les fichiers
+2- installer le backend:
+	à partir de la racine dans la console taper :
+		"cd/backend"
+		"npm install" (les dépendance doivent s'installer)
+		"npm run server"
+3- installer le frontend
+	à partir de la racine dans la console taper :
+		"cd/frontend"
+		"npm install" (les dépendance doivent s'installer)
+		"npm run serve"

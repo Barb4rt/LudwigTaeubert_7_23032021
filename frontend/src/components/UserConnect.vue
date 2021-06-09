@@ -1,20 +1,30 @@
 <template>
     <v-container fluid >
-            <div class="d-flex align-center">
+      <div v-if="onlyProfilePicture === true" class="d-flex align-center">
               <v-avatar :style="levelColor" 
             >
             <v-img 
                 alt=""
-                
                  :src= profil.profilePicture
               ></v-img>
               </v-avatar>
-              <div  class="mx-2 d-flex flex-column align-center ">{{profil.username}}
-<ExpBar id="level" @level-color="PPBordercolor" class="d-none"/>
+  
+              <ExpBar id="level" @level-color="PPBordercolor" class="d-none" :exp="profil.exp" />
+              </div>
+            <div v-else>
+            <div  class="d-flex align-center">
+              <v-avatar :style="levelColor" 
+            >
+            <v-img
+                alt=""
+                 :src= profil.profilePicture
+              ></v-img>
+              </v-avatar>
+              <div   class="mx-2 d-flex flex-column align-center ">{{profil.username}}
+              <ExpBar id="level" @level-color="PPBordercolor" class="d-none" :exp="profil.exp" />
               </div>
               </div>
-              
-                  <v-list>
+              <v-list  >
           <v-list-item
             v-for="(link, index) in links"
             :key="index"
@@ -30,6 +40,8 @@
     </v-list-item>
     </v-list-item-action>
         </v-list>
+          </div>    
+     
     </v-container>
 </template>
 
@@ -51,7 +63,11 @@ export default {
         return {};
       },
     },
-  },
+    onlyProfilePicture :{
+    type: Boolean,
+      require: true,
+  }
+    },
   data(){
       return{ 
           links: [
@@ -79,6 +95,7 @@ export default {
       this.switchLabel = this.switchLabel == 'Light' ? 'Dark' : 'Light'
     },
     PPBordercolor(payload){
+      console.log(payload.color);
        this.levelColor = `border: 3px solid ${payload.color}` 
     }
   },

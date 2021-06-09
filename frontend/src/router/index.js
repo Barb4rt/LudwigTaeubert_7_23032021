@@ -7,6 +7,7 @@ import Thread from "../views/Thread";
 import PrivateThread from "../views/PrivateThread";
 import userDashboard from "../views/UserDashboard";
 import userProfil from "../views/UserProfil";
+import adminDashboard from "../views/AdminDashboard"
 Vue.use(VueRouter);
 
 const routes = [
@@ -49,6 +50,12 @@ const routes = [
     component: userProfil,
     meta: { requiresAuth: true },
   },
+  {
+    path: "/admin",
+    name: "admindashboard",
+    component: adminDashboard,
+    meta: { requiresAuth: true },
+  }
 ];
 
 const router = new VueRouter({
@@ -60,9 +67,12 @@ const router = new VueRouter({
 router.beforeEach((to, from, next) => {
   const loggedIn = localStorage.getItem("user");
   if (to.matched.some((record) => record.meta.requiresAuth) && !loggedIn) {
-    next("/");
+    console.log("redirected to home");
+   next("/")
   }
-  next();
+  next()
+ 
+  
 });
 
 export default router;

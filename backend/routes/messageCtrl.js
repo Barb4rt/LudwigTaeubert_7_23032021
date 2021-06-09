@@ -75,8 +75,8 @@ module.exports = {
         if(newMessage) {
           userFound.update({
             exp: userFound.exp + 5
-          }).then(function(newMessage) {
-            done(newMessage);
+          }).then(function(userFound) {
+            done(userFound);
           }).catch((err)=>{
             return res.status(404).json({'error': err})
         });
@@ -84,9 +84,9 @@ module.exports = {
           res.status(500).json({ 'error': 'Impossible de mettre à jour l\'utilisateur' });
         }
       }
-    ], function(newMessage) {
-      if (newMessage) {
-        return res.status(201).json(newMessage);
+    ], function(userFound) {
+      if (userFound) {
+        return res.status(201).json({'message' : 'post saved'});
       } else {
         return res.status(500).json({ 'error': 'cannot post message' });
       }
@@ -116,15 +116,14 @@ module.exports = {
       },
         {
         model: models.User,
-        attributes :['id','bio','username' , 'profilePicture']
+        attributes :['id','bio','username','exp', 'profilePicture']
       },
       {
         model: models.Comment,
-        
         attributes: [ 'id','content','gifUrl' ],
         include: [ {
           model: models.User,
-          attributes :['username' , 'profilePicture']
+          attributes :['username' ,'exp', 'profilePicture']
         }]
       }
     ],
@@ -206,5 +205,68 @@ module.exports = {
         return res.status(500).json({ 'error': 'cannot post message' });
       }
     })
-  } 
+  },
+  adminDestroyMessage : (req, res) => {
+    // Getting auth header
+    const headerAuth  = req.headers['authorization'];
+    const userId      = jwtUtils.getUserId(headerAuth);
+    const isAdmin      = jwtUtils.getIsAdmin(headerAuth);
+   
+    asyncLib.waterfall([
+      (done) => {
+        models.User.findOne({
+          where : { id: userId,
+          isAdmin: isAdmin }
+        })
+        .then((adminFound) => {
+         done( null , adminFound)
+        }).catch((err) => {
+          return res.status(500).json({ 'error': 'Impossible de vérifier l\'administrateur'})
+        });
+      },
+      (adminFound, done) => {
+       if(adminFound){
+         models.Message.findOne({
+           where : { id : req.params.id}
+         }).then((messageFound) => {
+           done( null , messageFound)
+          }).catch((err) => {
+            return res.status(400).json({ 'error': 'Impossible de trouver le message'})
+          });
+       }
+      },
+      (messageFound, done) => {
+        if(messageFound){
+         if(messageFound.attachment){
+           const filename = messageFound.attachment.split('/images/')[1];
+         console.log(filename);
+           fs.unlink(`images/${filename}`, () => {
+             console.log(messageFound);
+            models.Message.destroy({
+              where : { id : req.params.id }
+            }).then((messageDestroy) => {
+             done( messageDestroy)
+            }).catch((err) => {
+              return res.status(500).json({ 'error': 'Impossible de supprimer l\'image'})
+         })
+       })
+     }else{
+      messageFound.destroy({
+       }).then((messageDestroy) => {
+        done( messageDestroy)
+       }).catch((err) => {
+         return res.status(500).json({ 'error': 'Impossible de supprimer le message'})
+       });
+     }
+          
+       } 
+      }
+    ],function(messageDestroy) {
+         if (messageDestroy) {
+           return res.status(201).json({'message' : 'message supprimée'});
+         } else {
+           return res.status(500).json({ 'error': 'Impossible de supprimer le message' });
+         }
+       })
+     }
 }

@@ -1,5 +1,5 @@
 import axios from "axios";
-import api from "./../../api";
+import api from "./../../api/index";
 
 export const Register = ({ commit }, credentials) => {
   return axios
@@ -32,7 +32,6 @@ export const  GetAllUsers = async ({ commit }) => {
 export const  GetUserProfil = async ({ commit }) => {
   try {
     await api.getUserProfil().then(({ data }) => {
-      console.log('test');
       commit("SET_USER_DATA", data);
       commit("UPDATE_STATUS", 'success');
   })
@@ -50,9 +49,9 @@ export const SeeProfil = async ({ commit },userId)=>{
     console.log(error);
   }
 }
-  export const DestroyProfil = async ({ commit }, data) => {
+export const DestroyProfil = async ({ commit }, data) => {
     commit("UPDATE_STATUS", 'pending');
-    console.log(data);
+    
     return api.destroyProfil(data).then(() => {
         commit("UPDATE_STATUS", 'success');
         commit("LOGOUT")
@@ -60,6 +59,15 @@ export const SeeProfil = async ({ commit },userId)=>{
       console.log(err);
     });
     }
+    export const adminDestroyProfil = async ({ commit }, data) => {
+      commit("UPDATE_STATUS", 'pending');
+      
+      return api.adminDestroyProfil(data).then(() => {
+          commit("UPDATE_STATUS", 'success');
+      }).catch((err) => {
+        console.log(err);
+      });
+      }
 
 
 export const GetAllPost = async ({ commit }) => {
@@ -80,19 +88,18 @@ export const FilterPost = ({ commit }, filter) => {
     commit("UPDATE_STATUS", 'pending');
     return axios
       .put("http://localhost:8081/api/user/me", credentials)
-      .then((data) => {
-        commit("GET_USER_PROFIL", data);
+      .then(() => {
         commit("UPDATE_STATUS", 'success');
       });
   };
 
   export const CreatePost = ({commit}, credentials)=>{
     commit("UPDATE_STATUS", 'pending');
-    console.log(credentials);
     return axios
     .post("http://localhost:8081/api/messages/new", credentials)
-    .then(() => {
+    .then((res) => {
       commit("UPDATE_STATUS", 'success')
+      return res
     })
     .catch((err) => {
       console.log(err);
@@ -119,13 +126,22 @@ export const FilterPost = ({ commit }, filter) => {
 
     export const DestroyPost = async ({ commit }, data) => {
         commit("UPDATE_STATUS", 'pending');
-        console.log(data);
+        
         return api.destroyPost(data).then(() => {
             commit("UPDATE_STATUS", 'success');
         }).catch((err) => {
           console.log(err);
         });
         }
+        export const adminDestroyPost = async ({ commit }, data) => {
+          commit("UPDATE_STATUS", 'pending');
+          
+          return api.adminDestroyPost(data).then(() => {
+              commit("UPDATE_STATUS", 'success');
+          }).catch((err) => {
+            console.log(err);
+          });
+          }
 
         export const DestroyComment = async ({ commit }, data) => {
           commit("UPDATE_STATUS", 'pending');

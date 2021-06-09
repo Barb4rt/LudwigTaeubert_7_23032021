@@ -52,9 +52,8 @@ module.exports = {
           return res.status(404).json({ 'error': 'impossible de trouver le message' });
         });
       },
-      (userFound,messageFound, done) => {
+      (userFound, messageFound, done) => {
         if(messageFound) {
-          console.log(messageFound);
           models.Comment.create({
             UserId: userFound.id,
             content: content,
@@ -62,12 +61,26 @@ module.exports = {
             MessageId: messageFound.id
           })
           .then((newComment)=>{
-            done( newComment);
+            done( null, newComment , userFound);
           }).catch((err)=>{
             return res.status(500).json({'error': 'Impossible de créer le commentaire'})
         });
         } else {
           res.status(404).json({ 'error': 'Impossible de trouver l\'utilisateur' });
+        }
+      },
+      function( newComment, userFound, done){
+        console.log(newComment);
+        if(newComment) {
+          userFound.update({
+            exp: userFound.exp + 3
+          }).then(function(userFound) {
+            done(userFound);
+          }).catch((err)=>{
+            return res.status(404).json({'error': err})
+        });
+        } else {
+          res.status(500).json({ 'error': 'Impossible de mettre à jour l\'utilisateur' });
         }
       }
     ], (newComment)=> {

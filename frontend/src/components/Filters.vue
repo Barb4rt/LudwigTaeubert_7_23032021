@@ -1,8 +1,7 @@
 <template>
-    <v-container fluid class="d-flex flex-column " >
-      <v-toolbar-title class="text-center grey--text my-2">Choisir un filtre</v-toolbar-title>
+    <v-sheet >
+      <div class="text-center grey--text my-2 ">Choisir un filtre</div>
       <v-chip-group
-      class="mx-auto"
         v-model="filter"
         active-class="primary--text"
         column
@@ -12,7 +11,7 @@
           {{ tag }}
         </v-chip>
       </v-chip-group>
-    </v-container>
+    </v-sheet>
 </template>
 
 <script>
