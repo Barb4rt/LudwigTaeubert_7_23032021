@@ -57,7 +57,7 @@
                   Vos préférences
                 </h2>
                 <v-btn color="info" @click="userModifyTags">
-                  Modifier mes préférences
+                  <v-icon>mdi-pencil</v-icon>
                 </v-btn>
               </div>
               <v-chip-group>
@@ -77,7 +77,7 @@
                   Vos nouvelles préférences
                 </h2>
                 <v-btn @click="cancelModifyTag" class="red white--text mt-2"
-                  >Annuler</v-btn
+                  ><v-icon>mdi-cancel</v-icon></v-btn
                 >
               </div>
               <v-chip-group>
