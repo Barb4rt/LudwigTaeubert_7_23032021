@@ -18,6 +18,10 @@ new Vue({
       const userData = JSON.parse(userString); // parse user data into JSON
       this.$store.commit("SET_USER_DATA", userData); // restore user data with Vuex
       this.$store.dispatch("GetUserProfil");
+<<<<<<< HEAD
+=======
+      this.$router.push("/thread");
+>>>>>>> 45ec9dc3f56a049632244e86671e6f53415b57bb
     }
     axios.interceptors.response.use(
       (response) => response, // simply return the response
