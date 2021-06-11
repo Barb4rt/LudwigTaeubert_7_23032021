@@ -1,0 +1,19 @@
+
+1- télecharger les fichiers
+2- installer le backend:
+	dans le fichier config.json vous trouverez tous les info en relation avec la connection à la base de donnée
+	à partir de la racine dans la console taper :
+		"cd backend"
+		"npm install" (les dépendance doivent s'installer)
+		"npm run server"
+3- installer le frontend
+	à partir de la racine dans la console taper :
+		"cd frontend"
+		"npm install" (les dépendance doivent s'installer)
+		"npm run serve"
+4-importer la base de donnée
+	Dans le fichier DB_SQL ce trouve la structure de la base de données importer là !!!
+
+Si le serveur ne ce lance pas verifier le PORT utiliser dans "server.js" pour evité les conflit !!!  par défault il ce lance sur le port 8081
+
+Pour vous connecter en tant que Administrateur les information son "email = admin@groupomania.com, password = Admin01"

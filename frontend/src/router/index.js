@@ -7,6 +7,7 @@ import Thread from "../views/Thread";
 import PrivateThread from "../views/PrivateThread";
 import userDashboard from "../views/UserDashboard";
 import userProfil from "../views/UserProfil";
+import adminDashboard from "../views/AdminDashboard";
 Vue.use(VueRouter);
 
 const routes = [
@@ -32,7 +33,7 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: "/thread/privatethread",
+    path: "/privatethread",
     name: "privatethread",
     component: PrivateThread,
     meta: { requiresAuth: true },
@@ -49,6 +50,12 @@ const routes = [
     component: userProfil,
     meta: { requiresAuth: true },
   },
+  {
+    path: "/admin",
+    name: "admindashboard",
+    component: adminDashboard,
+    meta: { requiresAuth: true },
+  },
 ];
 
 const router = new VueRouter({
@@ -59,10 +66,21 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   const loggedIn = localStorage.getItem("user");
-  if (to.matched.some((record) => record.meta.requiresAuth) && !loggedIn) {
-    next("/");
+  if(to.matched.some(record => record.meta.requiresAuth)) {
+    if (loggedIn) {
+      console.log(loggedIn);
+      next()
+      return
+    }
+    next('/')
   }
-  next();
-});
+  if (!loggedIn) {
+    console.log('loggedIn');
+    next()
+    return
+  }
+  next('/thread')
+} 
+ );
 
 export default router;
